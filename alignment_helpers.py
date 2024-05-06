@@ -11,7 +11,6 @@ from transformers import AutoModelForCTC, AutoTokenizer
 
 
 SAMPLING_FREQ = 16000
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 UROMAN_PATH = "uroman/bin"
 
 
@@ -398,7 +397,7 @@ def load_alignment_model(
     return model, tokenizer, dictionary
 
 
-def preprocess_text(text, split_size, language, star_frequency):
+def preprocess_text(text, split_size, language, romanize, star_frequency):
     assert split_size in [
         "sentence",
         "word",
@@ -410,7 +409,11 @@ def preprocess_text(text, split_size, language, star_frequency):
     ], "Star frequency must be segment or edges"
     text_split = split_text(text, split_size)
     norm_text = [text_normalize(line.strip(), language) for line in text_split]
-    tokens = get_uroman_tokens(norm_text, language)
+
+    if romanize:
+        tokens = get_uroman_tokens(norm_text, language)
+    else:
+        tokens = [" ".join(list(word)) for word in norm_text]
 
     # add <star> token to the tokens and text
     # it's used extensively here but I found that it produces more accurate results

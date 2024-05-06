@@ -30,8 +30,21 @@ def cli():
     parser.add_argument(
         "--language",
         type=str,
+        default=None,
         required=True,
-        help="Language in ISO 639-3 code.",
+        help="Language in ISO 639-3 code. Identifying the input as Arabic, Belarusian,"
+        " Bulgarian, English, Farsi, German, Ancient Greek, Modern Greek, Pontic Greek"
+        ", Hebrew, Kazakh, Kyrgyz, Latvian, Lithuanian, North Macedonian, Russian, "
+        "Serbian, Turkish, Ukrainian, Uyghur, Mongolian, Thai, Javanese or Yiddish "
+        "will improve romanization for those languages, No effect for other languages.",
+    )
+
+    parser.add_argument(
+        "--romanize",
+        action="store_false",
+        default=False,
+        help="Enable romanization for non-latin scripts. "
+        "Use if you are using a model that doesn't support your language vocabulary.",
     )
 
     parser.add_argument(
@@ -64,7 +77,8 @@ def cli():
         "--alignment_model",
         default="MahmoudAshraf/mms-300m-1130-forced-aligner",
         help="Name of the CTC (Wav2Vec2/HuBERT/MMS) model to use for alignment,"
-        " use english language models for all languages"
+        " you can choose a language-specific model or an "
+        "english model along with --romanize flag to support all languages."
         " accepts Huggingface model names or local pathes.",
     )
 
@@ -114,10 +128,10 @@ def cli():
     args = parser.parse_args()
 
     model, tokenizer, dictionary = load_alignment_model(
+        args.device,
         args.alignment_model,
         args.attn_implementation,
         TORCH_DTYPES[args.compute_dtype],
-        args.device,
     )
 
     audio_waveform = load_audio(args.audio_path, model.dtype, model.device)
@@ -125,12 +139,12 @@ def cli():
         model, audio_waveform, args.window_size, args.context_size, args.batch_size
     )
 
-    with open(args.file_path, "r") as f:
+    with open(args.text_path, "r") as f:
         lines = f.readlines()
     text = "".join(line for line in lines).replace("\n", " ").strip()
 
     tokens_starred, text_starred = preprocess_text(
-        text, args.split_size, args.language, args.star_frequency
+        text, args.split_size, args.language, args.romanize, args.star_frequency
     )
 
     segments, blank_id = get_alignments(
@@ -144,7 +158,7 @@ def cli():
     results = postprocess_results(text_starred, spans, stride, args.merge_threshold)
 
     # write the results to a file
-    with open(f"{os.path.splitext(args.audio_file)[0]}.txt", "w") as f:
+    with open(f"{os.path.splitext(args.audio_path)[0]}.txt", "w") as f:
         for result in results:
             f.write(f"{result['start']}-{result['end']}: {result['text']}\n")
 
