@@ -351,7 +351,7 @@ def get_alignments(
     blank_id = dictionary.get("<blank>")
     blank_id = dictionary.get("<pad>") if blank_id is None else blank_id
 
-    targets = torch.tensor(token_indices, dtype=torch.int32).to(DEVICE)
+    targets = torch.tensor(token_indices, dtype=torch.int32).to(emissions.device)
 
     input_lengths = torch.tensor(emissions.shape[0]).unsqueeze(-1)
     target_lengths = torch.tensor(targets.shape[0]).unsqueeze(-1)
