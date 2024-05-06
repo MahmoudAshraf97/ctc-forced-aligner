@@ -143,7 +143,7 @@ def cli():
     text = "".join(line for line in lines).replace("\n", " ").strip()
 
     tokens_starred, text_starred = preprocess_text(
-        text, args.split_size, args.language, args.romanize, args.star_frequency
+        text, args.romanize, args.language, args.split_size, args.star_frequency
     )
 
     segments, blank_id = get_alignments(
