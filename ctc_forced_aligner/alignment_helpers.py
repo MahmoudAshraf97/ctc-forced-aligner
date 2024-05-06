@@ -6,7 +6,7 @@ import unicodedata
 import tempfile
 import math
 from dataclasses import dataclass
-from norm_config import norm_config
+from .norm_config import norm_config
 from transformers import AutoModelForCTC, AutoTokenizer
 
 

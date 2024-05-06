@@ -1,7 +1,7 @@
-UROMAN_PATH = "uroman/bin"
+UROMAN_PATH = "..uroman/bin"
 import torch
 import os
-from alignment_helpers import (
+from .alignment_helpers import (
     load_alignment_model,
     load_audio,
     generate_emissions,
