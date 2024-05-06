@@ -1,0 +1,3 @@
+[submodule "ctc_forced_aligner/uroman"]
+	path = ctc_forced_aligner/uroman
+	url = https://github.com/isi-nlp/uroman
