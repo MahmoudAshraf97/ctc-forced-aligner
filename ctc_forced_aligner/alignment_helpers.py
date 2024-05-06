@@ -11,7 +11,7 @@ from transformers import AutoModelForCTC, AutoTokenizer
 
 
 SAMPLING_FREQ = 16000
-UROMAN_PATH = "uroman/bin"
+UROMAN_PATH = os.path.join("uroman","bin")
 
 
 def text_normalize(

@@ -1,4 +1,3 @@
-UROMAN_PATH = "..uroman/bin"
 import torch
 import os
 from .alignment_helpers import (
@@ -41,7 +40,7 @@ def cli():
 
     parser.add_argument(
         "--romanize",
-        action="store_false",
+        action="store_true",
         default=False,
         help="Enable romanization for non-latin scripts. "
         "Use if you are using a model that doesn't support your language vocabulary.",
@@ -152,7 +151,7 @@ def cli():
         tokens_starred,
         dictionary,
     )
-
+    
     spans = get_spans(tokens_starred, segments, tokenizer.decode(blank_id))
 
     results = postprocess_results(text_starred, spans, stride, args.merge_threshold)
