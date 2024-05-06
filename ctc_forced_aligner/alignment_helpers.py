@@ -11,7 +11,7 @@ from transformers import AutoModelForCTC, AutoTokenizer
 
 
 SAMPLING_FREQ = 16000
-UROMAN_PATH = os.path.join("uroman","bin")
+UROMAN_PATH = os.path.join(os.path.dirname(__file__),"uroman","bin")
 
 
 def text_normalize(
@@ -193,18 +193,8 @@ def split_text(text: str, split_size: str = "word"):
     if split_size == "sentence":
         from nltk.tokenize import PunktSentenceTokenizer
 
-        sentence_checker = PunktSentenceTokenizer().text_contains_sentbreak
-
-        sentences = []
-        text = text.split()
-        sentence = ""
-        for word in text:
-            if sentence_checker(
-                f"{sentence} {word}",
-            ):
-                sentences.append(sentence)
-                sentence = ""
-            sentence += f"{word} "
+        sentence_checker = PunktSentenceTokenizer()
+        sentences = sentence_checker.sentences_from_text(text)
         return sentences
 
     elif split_size == "word":
@@ -397,7 +387,7 @@ def load_alignment_model(
     return model, tokenizer, dictionary
 
 
-def preprocess_text(text, split_size, language, romanize, star_frequency):
+def preprocess_text(text, romanize, language, split_size="word", star_frequency="segment"):
     assert split_size in [
         "sentence",
         "word",
@@ -407,6 +397,8 @@ def preprocess_text(text, split_size, language, romanize, star_frequency):
         "segment",
         "edges",
     ], "Star frequency must be segment or edges"
+    if language in ["jpn", "chi"]:
+        split_size = "char"
     text_split = split_text(text, split_size)
     norm_text = [text_normalize(line.strip(), language) for line in text_split]
 
@@ -434,7 +426,7 @@ def preprocess_text(text, split_size, language, romanize, star_frequency):
 
 
 def postprocess_results(
-    text_starred: list, spans: list, stride: float, merge_threshold: float
+    text_starred: list, spans: list, stride: float, merge_threshold: float = 0.0
 ):
     results = []
 
