@@ -15,5 +15,6 @@ setup(
     entry_points={
         "console_scripts": ["ctc-forced-aligner=ctc_forced_aligner.align:cli"],
     },
+    package_data={"":"ctc_forced_aligner/punctuations.lst"},
     include_package_data=True,
 )
