@@ -172,7 +172,7 @@ roman_numeral = r"\u2170-\u2179"
 nominal_digit_shapes = r"\u206f"
 
 # Load punctuations from MMS-lab data
-with open(f"{os.path.dirname(__file__)}/punctuations.lst", "r") as punc_f:
+with open(f"punctuations.lst", "r") as punc_f:
     punc_list = punc_f.readlines()
 
 punct_pattern = r""    
