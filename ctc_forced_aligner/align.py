@@ -1,14 +1,13 @@
 import torch
 import os
-from .alignment_helpers import (
+from .alignment_utils import (
     load_alignment_model,
     load_audio,
     generate_emissions,
     get_alignments,
     get_spans,
-    preprocess_text,
-    postprocess_results,
 )
+from .text_utils import preprocess_text, postprocess_results
 
 TORCH_DTYPES = {
     "bfloat16": torch.bfloat16,
@@ -151,7 +150,7 @@ def cli():
         tokens_starred,
         dictionary,
     )
-    
+
     spans = get_spans(tokens_starred, segments, tokenizer.decode(blank_id))
 
     results = postprocess_results(text_starred, spans, stride, args.merge_threshold)
