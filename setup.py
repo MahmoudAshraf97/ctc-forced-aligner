@@ -1,5 +1,4 @@
 from setuptools import find_packages, setup
-from glob import glob
 
 setup(
     name="ctc-forced-aligner",
@@ -9,6 +8,7 @@ setup(
     readme="README.md",
     python_requires=">=3.8",
     author="Mahmoud Ashraf",
+    author_email="hassouna97.ma@gmail.com",
     url="https://github.com/MahmoudAshraf97/ctc-forced-aligner",
     license="CC-BY-NC 4.0",
     packages=find_packages(),
