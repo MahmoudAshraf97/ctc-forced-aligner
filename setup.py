@@ -23,7 +23,7 @@ setup(
         + [
             file
             for dir in ["bin", "data", "lib"]
-            for file in glob(f"uroman/{dir}/**/*.*", recursive=True)
+            for file in glob(f"ctc_forced_aligner/uroman/{dir}/**/*.*", recursive=True)
         ]
     },
     include_package_data=True,
