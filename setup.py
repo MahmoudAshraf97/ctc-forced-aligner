@@ -1,4 +1,5 @@
-from setuptools import find_packages, setup, find_namespace_packages
+from setuptools import find_packages, setup
+from glob import glob
 
 setup(
     name="ctc-forced-aligner",
@@ -10,11 +11,20 @@ setup(
     author="Mahmoud Ashraf",
     url="https://github.com/MahmoudAshraf97/ctc-forced-aligner",
     license="CC-BY-NC 4.0",
-    packages=find_namespace_packages(),
-    install_requires=["transformers", "torchaudio", "torch", ],
+    packages=find_packages(),
+    install_requires=[line.strip() for line in open("requirements.txt")],
     entry_points={
         "console_scripts": ["ctc-forced-aligner=ctc_forced_aligner.align:cli"],
     },
-    package_data={"":["punctuations.lst"]},
+    package_data={
+        "": [
+            "punctuations.lst",
+        ]
+        + [
+            file
+            for dir in ["bin", "data", "lib"]
+            for file in glob(f"uroman/{dir}/**/*.*", recursive=True)
+        ]
+    },
     include_package_data=True,
 )
