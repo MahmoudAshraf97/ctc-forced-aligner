@@ -16,15 +16,6 @@ setup(
     entry_points={
         "console_scripts": ["ctc-forced-aligner=ctc_forced_aligner.align:cli"],
     },
-    package_data={
-        "": [
-            "punctuations.lst",
-        ]
-        + [
-            file
-            for dir in ["bin", "data", "lib"]
-            for file in glob(f"ctc_forced_aligner/uroman/{dir}/**/*.*", recursive=True)
-        ]
-    },
+    package_data={"": ["punctuations.lst","uroman/*"]},
     include_package_data=True,
 )
