@@ -4,14 +4,15 @@ from setuptools import find_packages, setup
 # as it is a build dependency, using pyproject.toml build-system.requires
 # isn't suitable because it might compile the extension using a different
 # version of torch than the one that exists on the system
-import importlib
-try:
-    importlib.import_module("torch")
-except ImportError:
-    import pip
-    pip.main(['install', "torch"])
+import subprocess
+import sys
 
-from torch.utils import cpp_extension
+try:
+    subprocess.check_call([sys.executable, "-m", "pip", "show", 'torch'])
+except:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", 'torch'])
+finally:
+    from torch.utils import cpp_extension
 
 ext_modules = [
     cpp_extension.CppExtension(
