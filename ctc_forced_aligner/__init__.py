@@ -14,3 +14,4 @@ from .text_utils import (
     split_text,
     merge_segments,
 )
+from .ctc_forced_aligner import forced_align
