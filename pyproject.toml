@@ -1,3 +1,7 @@
-[build-system]
-requires = ["setuptools>=61", "wheel", "torch"]
-build-backend = "setuptools.build_meta"
+#[build-system]
+#requires = ["setuptools>=61", "wheel", "torch"]
+#build-backend = "setuptools.build_meta"
+
+dependencies = [
+    "torch",
+]
