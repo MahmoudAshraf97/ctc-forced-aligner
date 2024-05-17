@@ -1,4 +1,16 @@
 from setuptools import find_packages, setup
+
+### This is required to install torch before importing it
+# as it is a build dependency, using pyproject.toml build-system.requires
+# isn't suitable because it might compile the extension using a different
+# version of torch than the one that exists on the system
+import importlib
+try:
+    importlib.import_module("torch")
+except ImportError:
+    import pip
+    pip.main(['install', "torch"])
+
 from torch.utils import cpp_extension
 
 ext_modules = [
