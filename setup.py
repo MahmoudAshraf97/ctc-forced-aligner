@@ -1,23 +1,11 @@
 from setuptools import find_packages, setup
-
-### This is required to install torch before importing it
-# as it is a build dependency, using pyproject.toml build-system.requires
-# isn't suitable because it might compile the extension using a different
-# version of torch than the one that exists on the system
-import subprocess
-import sys
-
-try:
-    subprocess.check_call([sys.executable, "-m", "pip", "show", 'torch'])
-except:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", 'torch'])
-finally:
-    from torch.utils import cpp_extension
+from torch.utils import cpp_extension
 
 ext_modules = [
     cpp_extension.CppExtension(
         "ctc_forced_aligner.ctc_forced_aligner",
         ["ctc_forced_aligner/forced_align_impl.cpp"],
+        extra_compile_args=['-O3'],
     )
 ]
 
