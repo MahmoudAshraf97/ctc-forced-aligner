@@ -129,11 +129,12 @@ void forced_align_impl(
     // Calculate backPtr value from bits
     auto backPtr_idx = backPtr_seek[std::max(t - 1, static_cast<long int>(0))] +
         ltrIdx - backPtr_offset[std::max(t - 1, static_cast<long int>(0))];
+    backPtr_idx = (backPtr_idx + ((S + 1) * (T - L))) % ((S + 1) * (T - L))
     ltrIdx -= (backPtrBit1[backPtr_idx] << 1) | backPtrBit0[backPtr_idx];
   }
 }
 
-std::tuple<torch::Tensor, torch::Tensor> compute(
+torch::Tensor compute(
     const torch::Tensor& logProbs,
     const torch::Tensor& targets,
     const torch::Tensor& inputLengths,
@@ -195,13 +196,7 @@ std::tuple<torch::Tensor, torch::Tensor> compute(
               logProbs, targets, blank, paths);
         }
       });
-  return std::make_tuple(
-      paths,
-      logProbs.index(
-          {torch::indexing::Slice(),
-           torch::linspace(
-               0, T - 1, T, torch::TensorOptions().dtype(paths.dtype())),
-           paths.index({0})}));
+  return paths;
 }
 
 namespace py = pybind11;
