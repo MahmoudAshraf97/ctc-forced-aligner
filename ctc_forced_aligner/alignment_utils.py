@@ -2,8 +2,15 @@ import torch
 import torchaudio
 import math
 from dataclasses import dataclass
-from transformers import AutoModelForCTC, AutoTokenizer
-
+from transformers import (
+    AutoModelForCTC,
+    AutoTokenizer,
+    __version__ as transformers_version,
+)
+from transformers.utils import is_flash_attn_2_available
+from .ctc_forced_aligner import forced_align as forced_align_cpp
+from typing import Optional, Tuple
+from packaging import version
 
 SAMPLING_FREQ = 16000
 
@@ -144,6 +151,78 @@ def generate_emissions(
     return emissions, math.ceil(stride)
 
 
+def forced_align(
+    log_probs: torch.Tensor,
+    targets: torch.Tensor,
+    input_lengths: Optional[torch.Tensor] = None,
+    target_lengths: Optional[torch.Tensor] = None,
+    blank: int = 0,
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    r"""Align a CTC label sequence to an emission.
+
+    .. devices:: CPU CUDA
+
+    .. properties:: TorchScript
+
+    Args:
+        log_probs (Tensor): log probability of CTC emission output.
+            Tensor of shape `(B, T, C)`. where `B` is the batch size, `T` is the input length,
+            `C` is the number of characters in alphabet including blank.
+        targets (Tensor): Target sequence. Tensor of shape `(B, L)`,
+            where `L` is the target length.
+        input_lengths (Tensor or None, optional):
+            Lengths of the inputs (max value must each be <= `T`). 1-D Tensor of shape `(B,)`.
+        target_lengths (Tensor or None, optional):
+            Lengths of the targets. 1-D Tensor of shape `(B,)`.
+        blank_id (int, optional): The index of blank symbol in CTC emission. (Default: 0)
+
+    Returns:
+        Tuple(Tensor, Tensor):
+            Tensor: Label for each time step in the alignment path computed using forced alignment.
+
+            Tensor: Log probability scores of the labels for each time step.
+
+    Note:
+        The sequence length of `log_probs` must satisfy:
+
+
+        .. math::
+            L_{\text{log\_probs}} \ge L_{\text{label}} + N_{\text{repeat}}
+
+        where :math:`N_{\text{repeat}}` is the number of consecutively repeated tokens.
+        For example, in str `"aabbc"`, the number of repeats are `2`.
+
+    Note:
+        The current version only supports ``batch_size==1``.
+    """
+    if blank in targets:
+        raise ValueError(
+            f"targets Tensor shouldn't contain blank index. Found {targets}."
+        )
+    if torch.max(targets) >= log_probs.shape[-1]:
+        raise ValueError("targets values must be less than the CTC dimension")
+
+    if input_lengths is None:
+        batch_size, length = log_probs.size(0), log_probs.size(1)
+        input_lengths = torch.full(
+            (batch_size,), length, dtype=torch.int64, device=log_probs.device
+        )
+    if target_lengths is None:
+        batch_size, length = targets.size(0), targets.size(1)
+        target_lengths = torch.full(
+            (batch_size,), length, dtype=torch.int64, device=targets.device
+        )
+
+    # For TorchScript compatibility
+    assert input_lengths is not None
+    assert target_lengths is not None
+
+    paths, scores = forced_align_cpp(
+        log_probs, targets, input_lengths, target_lengths, blank
+    )
+    return paths, scores
+
+
 def get_alignments(
     emissions: torch.Tensor,
     tokens: list,
@@ -158,19 +237,20 @@ def get_alignments(
 
     blank_id = dictionary.get("<blank>")
     blank_id = dictionary.get("<pad>") if blank_id is None else blank_id
-
-    targets = torch.tensor(token_indices, dtype=torch.int32).to(emissions.device)
+    if emissions.is_cuda:
+        emissions = emissions.cpu()
+    targets = torch.tensor(token_indices, dtype=torch.int32)
 
     input_lengths = torch.tensor(emissions.shape[0]).unsqueeze(-1)
     target_lengths = torch.tensor(targets.shape[0]).unsqueeze(-1)
-    path, _ = torchaudio.functional.forced_align(
+    path, _ = forced_align(
         emissions.unsqueeze(0).float(),
         targets.unsqueeze(0),
         input_lengths,
         target_lengths,
         blank=blank_id,
     )
-    path = path.squeeze().to("cpu").tolist()
+    path = path.squeeze().tolist()
 
     segments = merge_repeats(path, {v: k for k, v in dictionary.items()})
     return segments, blank_id
@@ -179,9 +259,17 @@ def get_alignments(
 def load_alignment_model(
     device: str,
     model_path: str = "MahmoudAshraf/mms-300m-1130-forced-aligner",
-    attn_implementation: str = "eager",
+    attn_implementation: str = None,
     dtype: torch.dtype = torch.float32,
 ):
+    if attn_implementation is None:
+        if version.parse(transformers_version) < version.parse("4.41.0"):
+            attn_implementation = "eager"
+        elif is_flash_attn_2_available():
+            attn_implementation = "flash_attention_2"
+        else:
+            attn_implementation = "sdpa"
+
     model = (
         AutoModelForCTC.from_pretrained(
             model_path,
