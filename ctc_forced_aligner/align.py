@@ -8,6 +8,7 @@ from .alignment_utils import (
     get_spans,
 )
 from .text_utils import preprocess_text, postprocess_results
+import json
 
 TORCH_DTYPES = {
     "bfloat16": torch.bfloat16,
@@ -113,9 +114,9 @@ def cli():
     parser.add_argument(
         "--attn_implementation",
         type=str,
-        default="eager",
-        choices=["eager", "sdpa", "flash_attention_2"],
-        help="Attention implementation for the model.",
+        default=None,
+        choices=["eager", "sdpa", "flash_attention_2", None],
+        help="Attention implementation for the model. It will chose the fastest implementation by default.",
     )
 
     parser.add_argument(
@@ -159,6 +160,16 @@ def cli():
     with open(f"{os.path.splitext(args.audio_path)[0]}.txt", "w") as f:
         for result in results:
             f.write(f"{result['start']}-{result['end']}: {result['text']}\n")
+    # write the results to a json file with the whole text and each segment
+    with open(f"{os.path.splitext(args.audio_path)[0]}.json", "w") as f:
+        json.dump(
+            {
+                "text": text,
+                "segments": results,
+            },
+            f,
+            indent=4,
+        )
 
 
 if __name__ == "__main__":
