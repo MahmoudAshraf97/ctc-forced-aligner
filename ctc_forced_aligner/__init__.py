@@ -5,6 +5,7 @@ from .alignment_utils import (
     get_alignments,
     get_spans,
     merge_repeats,
+    forced_align,
 )
 from .text_utils import (
     preprocess_text,
@@ -14,4 +15,3 @@ from .text_utils import (
     split_text,
     merge_segments,
 )
-from .ctc_forced_aligner import forced_align
