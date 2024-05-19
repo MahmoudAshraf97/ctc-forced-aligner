@@ -5,6 +5,7 @@ from .alignment_utils import (
     get_alignments,
     get_spans,
     merge_repeats,
+    forced_align,
 )
 from .text_utils import (
     preprocess_text,
