@@ -127,8 +127,9 @@ void forced_align_impl(
     auto lbl_idx = ltrIdx % 2 == 0 ? blank : targets_a[batchIndex][ltrIdx / 2];
     paths_a[batchIndex][t] = lbl_idx;
     // Calculate backPtr value from bits
-    auto backPtr_idx = backPtr_seek[std::max(t - 1, static_cast<long int>(0))] +
-        ltrIdx - backPtr_offset[std::max(t - 1, static_cast<long int>(0))];
+    auto t_minus_one = t - 1 >= 0 ? t - 1 : 0;
+    auto backPtr_idx = backPtr_seek[t_minus_one] +
+                       ltrIdx - backPtr_offset[t_minus_one];
     ltrIdx -= (backPtrBit1[backPtr_idx] << 1) | backPtrBit0[backPtr_idx];
   }
 }
