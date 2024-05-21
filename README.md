@@ -1,5 +1,9 @@
 <h1 align="center">Forced Alignment with Hugging Face CTC Models</h1>
 <p align="center">
+  <a href="https://github.com/MahmoudAshraf97/ctc-forced-aligner/actions/workflows/test_build.yml">
+    <img src="https://github.com/MahmoudAshraf97/ctc-forced-aligner/actions/workflows/test_build.yml/badge.svg"
+         alt="Build Status">
+  </a>
   <a href="https://github.com/MahmoudAshraf97/ctc-forced-aligner/stargazers">
     <img src="https://img.shields.io/github/stars/MahmoudAshraf97/ctc-forced-aligner.svg?colorA=orange&colorB=orange&logo=github"
          alt="GitHub stars">
