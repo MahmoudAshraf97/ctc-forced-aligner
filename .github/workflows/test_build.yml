@@ -34,11 +34,8 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install flake8 pytest ninja wheel setuptools
         python -m pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
-        if ${{ matrix.os == 'windows-latest' }}; then
-          if (Test-Path requirements.txt) { pip install -r requirements.txt }
-        else
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        fi
+        python -m pip install -r requirements.txt
+       
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
