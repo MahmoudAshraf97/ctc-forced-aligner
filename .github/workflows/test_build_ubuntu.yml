@@ -37,7 +37,7 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Install package
       run: |
-        python -m pip install -e .
+        python -m pip install -e . --no-build-isolation
     - name: Test importing compiled extension
       run: |
         python -c "from ctc_forced_aligner import forced_align"
