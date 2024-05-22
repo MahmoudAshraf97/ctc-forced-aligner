@@ -8,7 +8,22 @@ from transformers import (
     __version__ as transformers_version,
 )
 from transformers.utils import is_flash_attn_2_available
-from .ctc_forced_aligner import forced_align as forced_align_cpp
+
+try:
+    from .ctc_forced_aligner import forced_align as forced_align_cpp
+except Exception as e:
+    if all(
+        substring in e.__repr__()
+        for substring in ["ctc_forced_aligner", "undefined symbol"]
+    ):
+        raise ImportError(
+            "ctc-forced-aligner package was build using a different version of "
+            "torch than the one currently installed, reinstall the package again using: \n"
+            "pip install git+https://github.com/MahmoudAshraf97/ctc-forced-aligner.git --force-reinstall --no-deps"
+        )
+    else:
+        raise e
+
 from typing import Optional, Tuple
 from packaging import version
 
