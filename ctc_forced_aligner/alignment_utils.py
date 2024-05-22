@@ -140,7 +140,9 @@ def generate_emissions(
         :,
         time_to_frame(context_length) : -time_to_frame(context_length) + 1,
     ]  # removing the context
-    emissions = emissions.flatten(0, 1)[: -time_to_frame(extention / SAMPLING_FREQ), :]
+    emissions = emissions.flatten(0, 1)
+    if extention > 0:
+        emissions = emissions[: -time_to_frame(extention / SAMPLING_FREQ), :]
 
     emissions = torch.log_softmax(emissions, dim=-1)
     emissions = torch.cat(
