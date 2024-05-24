@@ -38,7 +38,10 @@ This Python package provides an efficient way to perform forced alignment betwee
 
 
 ### Installation
-#### MAKE SURE TO INSTALL PYTORCH FIRST
+#### MAKE SURE TO INSTALL BUILD REQUIREMENTS FIRST
+```bash
+pip install wheel torch
+```
 ```bash
 pip install git+https://github.com/MahmoudAshraf97/ctc-forced-aligner.git
 ```
