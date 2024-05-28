@@ -9,6 +9,10 @@ description = "Text to speech alignment using CTC forced alignment"
 license = { text = "CC-BY-NC 4.0" }
 authors = [
   {name = "Mahmoud Ashraf", email = "hassouna97.ma@gmail.com"},]
+dynamic = ["dependencies"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
 
 [project.urls]
 repository = "https://github.com/MahmoudAshraf97/ctc-forced-aligner"
