@@ -2,12 +2,6 @@
 requires = ["setuptools>=42", "wheel", "pybind11"]
 build-backend = "setuptools.build_meta"
 
-[tool.pybind11_extension]
-package = "ctc_forced_aligner.ctc_forced_aligner"
-sources = ["ctc_forced_aligner/forced_align_impl.cpp"]
-extra_compile_args = ["-O3"]
-
-
 [project]
 name = "ctc-forced-aligner"
 version = "0.1"
@@ -15,7 +9,6 @@ description = "Text to speech alignment using CTC forced alignment"
 license = { text = "CC-BY-NC 4.0" }
 authors = [
   {name = "Mahmoud Ashraf", email = "hassouna97.ma@gmail.com"},]
-
 
 [project.urls]
 repository = "https://github.com/MahmoudAshraf97/ctc-forced-aligner"
