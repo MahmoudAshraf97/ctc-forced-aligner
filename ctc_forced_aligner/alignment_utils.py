@@ -8,22 +8,7 @@ from transformers import (
     __version__ as transformers_version,
 )
 from transformers.utils import is_flash_attn_2_available
-
-try:
-    from .ctc_forced_aligner import forced_align as forced_align_cpp
-except Exception as e:
-    if all(
-        substring in e.__repr__()
-        for substring in ["ctc_forced_aligner", "undefined symbol"]
-    ):
-        raise ImportError(
-            "ctc-forced-aligner package was build using a different version of "
-            "torch than the one currently installed, reinstall the package again using: \n"
-            "pip install git+https://github.com/MahmoudAshraf97/ctc-forced-aligner.git --force-reinstall --no-deps"
-        )
-    else:
-        raise e
-
+from .ctc_forced_aligner import forced_align as forced_align_cpp
 from typing import Optional, Tuple
 from packaging import version
 
@@ -176,11 +161,6 @@ def forced_align(
     blank: int = 0,
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     r"""Align a CTC label sequence to an emission.
-
-    .. devices:: CPU CUDA
-
-    .. properties:: TorchScript
-
     Args:
         log_probs (Tensor): log probability of CTC emission output.
             Tensor of shape `(B, T, C)`. where `B` is the batch size, `T` is the input length,
@@ -235,7 +215,11 @@ def forced_align(
     assert target_lengths is not None
 
     paths, scores = forced_align_cpp(
-        log_probs, targets, input_lengths, target_lengths, blank
+        log_probs.numpy(),
+        targets.numpy(),
+        input_lengths.numpy(),
+        target_lengths.numpy(),
+        blank,
     )
     return paths, scores
 

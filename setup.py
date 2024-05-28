@@ -1,8 +1,8 @@
 from setuptools import find_packages, setup
-from torch.utils import cpp_extension
+from pybind11.setup_helpers import Pybind11Extension, build_ext
 
 ext_modules = [
-    cpp_extension.CppExtension(
+    Pybind11Extension(
         "ctc_forced_aligner.ctc_forced_aligner",
         ["ctc_forced_aligner/forced_align_impl.cpp"],
         extra_compile_args=['-O3'],
@@ -23,7 +23,7 @@ setup(
     packages=find_packages(),
     install_requires=[line.strip() for line in open("requirements.txt")],
     ext_modules=ext_modules,
-    cmdclass={"build_ext": cpp_extension.BuildExtension},
+    cmdclass={"build_ext": build_ext},
     entry_points={
         "console_scripts": ["ctc-forced-aligner=ctc_forced_aligner.align:cli"],
     },
