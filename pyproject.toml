@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ctc-forced-aligner"
-version = "0.1"
+version = "0.2"
 description = "Text to speech alignment using CTC forced alignment"
 license = { text = "CC-BY-NC 4.0" }
 authors = [

@@ -11,6 +11,7 @@ from transformers.utils import is_flash_attn_2_available
 from .ctc_forced_aligner import forced_align as forced_align_cpp
 from typing import Optional, Tuple
 from packaging import version
+import numpy as np
 
 SAMPLING_FREQ = 16000
 
@@ -154,30 +155,30 @@ def generate_emissions(
 
 
 def forced_align(
-    log_probs: torch.Tensor,
-    targets: torch.Tensor,
-    input_lengths: Optional[torch.Tensor] = None,
-    target_lengths: Optional[torch.Tensor] = None,
+    log_probs: np.ndarray,
+    targets: np.ndarray,
+    input_lengths: Optional[np.ndarray] = None,
+    target_lengths: Optional[np.ndarray] = None,
     blank: int = 0,
-) -> Tuple[torch.Tensor, torch.Tensor]:
+) -> Tuple[np.ndarray, np.ndarray]:
     r"""Align a CTC label sequence to an emission.
     Args:
-        log_probs (Tensor): log probability of CTC emission output.
-            Tensor of shape `(B, T, C)`. where `B` is the batch size, `T` is the input length,
+        log_probs (NDArray): log probability of CTC emission output.
+            NDArray of shape `(B, T, C)`. where `B` is the batch size, `T` is the input length,
             `C` is the number of characters in alphabet including blank.
-        targets (Tensor): Target sequence. Tensor of shape `(B, L)`,
+        targets (NDArray): Target sequence. NDArray of shape `(B, L)`,
             where `L` is the target length.
-        input_lengths (Tensor or None, optional):
-            Lengths of the inputs (max value must each be <= `T`). 1-D Tensor of shape `(B,)`.
-        target_lengths (Tensor or None, optional):
-            Lengths of the targets. 1-D Tensor of shape `(B,)`.
+        input_lengths (NDArray or None, optional):
+            Lengths of the inputs (max value must each be <= `T`). 1-D NDArray of shape `(B,)`.
+        target_lengths (NDArray or None, optional):
+            Lengths of the targets. 1-D NDArray of shape `(B,)`.
         blank_id (int, optional): The index of blank symbol in CTC emission. (Default: 0)
 
     Returns:
-        Tuple(Tensor, Tensor):
-            Tensor: Label for each time step in the alignment path computed using forced alignment.
+        Tuple(NDArray, NDArray):
+            NDArray: Label for each time step in the alignment path computed using forced alignment.
 
-            Tensor: Log probability scores of the labels for each time step.
+            NDArray: Log probability scores of the labels for each time step.
 
     Note:
         The sequence length of `log_probs` must satisfy:
@@ -196,29 +197,15 @@ def forced_align(
         raise ValueError(
             f"targets Tensor shouldn't contain blank index. Found {targets}."
         )
-    if torch.max(targets) >= log_probs.shape[-1]:
-        raise ValueError("targets values must be less than the CTC dimension")
-
-    if input_lengths is None:
-        batch_size, length = log_probs.size(0), log_probs.size(1)
-        input_lengths = torch.full(
-            (batch_size,), length, dtype=torch.int64, device=log_probs.device
-        )
-    if target_lengths is None:
-        batch_size, length = targets.size(0), targets.size(1)
-        target_lengths = torch.full(
-            (batch_size,), length, dtype=torch.int64, device=targets.device
-        )
-
-    # For TorchScript compatibility
-    assert input_lengths is not None
-    assert target_lengths is not None
+    if blank >= log_probs.shape[-1] or blank < 0:
+        raise ValueError("blank must be within [0, log_probs.shape[-1])")
+    if np.max(targets) >= log_probs.shape[-1] and np.min(targets) >= 0:
+        raise ValueError("targets values must be within [0, log_probs.shape[-1])")
+    assert log_probs.dtype == np.float32, "log_probs must be float32"
 
     paths, scores = forced_align_cpp(
-        log_probs.numpy(),
-        targets.numpy(),
-        input_lengths.numpy(),
-        target_lengths.numpy(),
+        log_probs,
+        targets,
         blank,
     )
     return paths, scores
@@ -240,15 +227,11 @@ def get_alignments(
     blank_id = dictionary.get("<pad>") if blank_id is None else blank_id
     if emissions.is_cuda:
         emissions = emissions.cpu()
-    targets = torch.tensor(token_indices, dtype=torch.int32)
+    targets = np.asarray([token_indices], dtype=np.int64)
 
-    input_lengths = torch.tensor(emissions.shape[0]).unsqueeze(-1)
-    target_lengths = torch.tensor(targets.shape[0]).unsqueeze(-1)
     path, _ = forced_align(
-        emissions.unsqueeze(0).float(),
-        targets.unsqueeze(0),
-        input_lengths,
-        target_lengths,
+        emissions.unsqueeze(0).float().numpy(),
+        targets,
         blank=blank_id,
     )
     path = path.squeeze().tolist()
@@ -266,7 +249,11 @@ def load_alignment_model(
     if attn_implementation is None:
         if version.parse(transformers_version) < version.parse("4.41.0"):
             attn_implementation = "eager"
-        elif is_flash_attn_2_available():
+        elif (
+            is_flash_attn_2_available()
+            and device == "cuda"
+            and dtype in [torch.float16, torch.bfloat16]
+        ):
             attn_implementation = "flash_attention_2"
         else:
             attn_implementation = "sdpa"

@@ -122,14 +122,11 @@ void forced_align_impl(
 std::tuple<py::array_t<int64_t>, py::array_t<float>> compute(
     const py::array_t<float>& logProbs,
     const py::array_t<int64_t>& targets,
-    const py::array_t<int64_t>& inputLengths,
-    const py::array_t<int64_t>& targetLengths,
     const int64_t blank) {
 
   if (logProbs.ndim() != 3) throw std::runtime_error("log_probs must be a 3-D array.");
   if (targets.ndim() != 2) throw std::runtime_error("targets must be a 2-D array.");
   if (logProbs.shape(0) != 1) throw std::runtime_error("Batch size must be 1.");
-  if (blank < 0 || blank > logProbs.shape(-1)) throw std::runtime_error("blank must be within [0, num classes)");
 
   const auto B = logProbs.shape(0);
   const auto T = logProbs.shape(1);
