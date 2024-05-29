@@ -85,7 +85,7 @@ def cli():
     parser.add_argument(
         "--compute_dtype",
         type=str,
-        default="float32",
+        default="float16" if torch.cuda.is_available() else "float32",
         choices=["bfloat16", "float16", "float32"],
         help="Compute dtype for alignment model inference. Helps with speed and memory usage.",
     )
