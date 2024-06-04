@@ -123,11 +123,6 @@ alignment_model, alignment_tokenizer, alignment_dictionary = load_alignment_mode
     dtype=torch.float16 if device == "cuda" else torch.float32,
 )
 
-audio_waveform = (
-    torch.from_numpy(audio_waveform)
-    .to(alignment_model.dtype)
-    .to(alignment_model.device)
-)
 
 emissions, stride = generate_emissions(
     alignment_model, audio_waveform, batch_size=batch_size
