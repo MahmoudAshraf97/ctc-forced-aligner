@@ -108,6 +108,7 @@ from ctc_forced_aligner import (
 
 audio_path = "your/audio/path"
 text_path = "your/text/path"
+language = "iso" # ISO-639-3 Language code
 
 audio_waveform = load_audio(audio_path, model.dtype, model.device)
     emissions, stride = generate_emissions(
@@ -132,7 +133,7 @@ emissions, stride = generate_emissions(
 tokens_starred, text_starred = preprocess_text(
     text,
     romanize=True,
-    language=langs_to_iso[language],
+    language=language,
 )
 
 
