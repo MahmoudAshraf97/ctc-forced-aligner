@@ -137,7 +137,7 @@ tokens_starred, text_starred = preprocess_text(
 )
 
 
-segments, blank_id = get_alignments(
+segments, scores, blank_id = get_alignments(
     emissions,
     tokens_starred,
     alignment_dictionary,
@@ -145,7 +145,7 @@ segments, blank_id = get_alignments(
 
 spans = get_spans(tokens_starred, segments, alignment_tokenizer.decode(blank_id))
 
-word_timestamps = postprocess_results(text_starred, spans, stride)
+word_timestamps = postprocess_results(text_starred, spans, stride, scores)
 
 ```
 

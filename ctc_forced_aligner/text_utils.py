@@ -3,6 +3,7 @@ import unicodedata
 import tempfile
 import os
 from .norm_config import norm_config
+import numpy as np
 
 UROMAN_PATH = os.path.join(os.path.dirname(__file__), "uroman", "bin")
 
@@ -230,7 +231,11 @@ def merge_segments(segments, threshold=0.00):
 
 
 def postprocess_results(
-    text_starred: list, spans: list, stride: float, merge_threshold: float = 0.0
+    text_starred: list,
+    spans: list,
+    stride: float,
+    scores: np.ndarray,
+    merge_threshold: float = 0.0,
 ):
     results = []
 
@@ -243,11 +248,12 @@ def postprocess_results(
 
         audio_start_sec = seg_start_idx * (stride) / 1000
         audio_end_sec = seg_end_idx * (stride) / 1000
-
+        score = scores[seg_start_idx:seg_end_idx].sum()
         sample = {
             "start": audio_start_sec,
             "end": audio_end_sec,
             "text": t,
+            "score": score,
         }
         results.append(sample)
 

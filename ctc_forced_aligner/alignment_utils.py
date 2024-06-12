@@ -229,7 +229,7 @@ def get_alignments(
         emissions = emissions.cpu()
     targets = np.asarray([token_indices], dtype=np.int64)
 
-    path, _ = forced_align(
+    path, scores = forced_align(
         emissions.unsqueeze(0).float().numpy(),
         targets,
         blank=blank_id,
@@ -237,7 +237,7 @@ def get_alignments(
     path = path.squeeze().tolist()
 
     segments = merge_repeats(path, {v: k for k, v in dictionary.items()})
-    return segments, blank_id
+    return segments, scores, blank_id
 
 
 def load_alignment_model(

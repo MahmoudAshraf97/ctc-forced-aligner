@@ -146,7 +146,7 @@ def cli():
         text, args.romanize, args.language, args.split_size, args.star_frequency
     )
 
-    segments, blank_id = get_alignments(
+    segments, scores, blank_id = get_alignments(
         emissions,
         tokens_starred,
         dictionary,
@@ -154,7 +154,9 @@ def cli():
 
     spans = get_spans(tokens_starred, segments, tokenizer.decode(blank_id))
 
-    results = postprocess_results(text_starred, spans, stride, args.merge_threshold)
+    results = postprocess_results(
+        text_starred, spans, stride, scores, args.merge_threshold
+    )
 
     # write the results to a file
     with open(f"{os.path.splitext(args.audio_path)[0]}.txt", "w") as f:
