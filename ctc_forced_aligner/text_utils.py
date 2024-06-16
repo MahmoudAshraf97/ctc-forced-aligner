@@ -253,7 +253,7 @@ def postprocess_results(
             "start": audio_start_sec,
             "end": audio_end_sec,
             "text": t,
-            "score": score,
+            "score": score.item(),
         }
         results.append(sample)
 
