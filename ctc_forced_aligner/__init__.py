@@ -1,3 +1,4 @@
+# flake8: noqa F401
 from .alignment_utils import (
     load_alignment_model,
     load_audio,

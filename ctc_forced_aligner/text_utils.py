@@ -60,13 +60,13 @@ def text_normalize(
 
     punct_pattern = r"[" + config["punc_set"]
 
-    punct_pattern += "]"
+    punct_pattern += r"]"
 
     normalized_text = re.sub(punct_pattern, " ", text)
 
     # remove characters in delete list
 
-    delete_patten = r"[" + config["del_set"] + "]"
+    delete_patten = r"[" + config["del_set"] + r"]"
 
     normalized_text = re.sub(delete_patten, "", normalized_text)
 
@@ -77,18 +77,18 @@ def text_normalize(
 
     if remove_numbers:
 
-        digits_pattern = "[" + config["digit_set"]
+        digits_pattern = r"[" + config["digit_set"]
 
-        digits_pattern += "]+"
+        digits_pattern += r"]+"
 
         complete_digit_pattern = (
             r"^"
             + digits_pattern
-            + "(?=\s)|(?<=\s)"
+            + r"(?=\s)|(?<=\s)"
             + digits_pattern
-            + "(?=\s)|(?<=\s)"
+            + r"(?=\s)|(?<=\s)"
             + digits_pattern
-            + "$"
+            + r"$"
         )
 
         normalized_text = re.sub(complete_digit_pattern, " ", normalized_text)
