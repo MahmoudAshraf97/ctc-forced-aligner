@@ -107,14 +107,12 @@ from ctc_forced_aligner import (
     postprocess_results,
 )
 
-audio_path = "your/audio/path"
-text_path = "your/text/path"
-language = "iso" # ISO-639-3 Language code
+audio_path = "20200128-Pieter Wuille (part 1 of 2) - Episode 1.mp3"
+text_path = "text.txt"
+language = "eng"  # ISO-639-3 Language code
 device = "cuda" if torch.cuda.is_available() else "cpu"
-# Optional Arguments
-window_size = 30
-context_size = 2
-batch_size = 4
+batch_size = 16
+
 
 alignment_model, alignment_tokenizer, alignment_dictionary = load_alignment_model(
     device,
@@ -123,9 +121,6 @@ alignment_model, alignment_tokenizer, alignment_dictionary = load_alignment_mode
 
 audio_waveform = load_audio(audio_path, alignment_model.dtype, alignment_model.device)
 
-emissions, stride = generate_emissions(
-    alignment_model, audio_waveform, window_size, context_size, batch_size
-)
 
 with open(text_path, "r") as f:
     lines = f.readlines()
