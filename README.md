@@ -96,6 +96,7 @@ ctc-forced-aligner --audio_path "audio.wav" --text_path "text.txt" --language "a
   
 ### Python Usage
 ```python
+import torch
 from ctc_forced_aligner import (
     load_audio,
     load_alignment_model,
@@ -109,33 +110,36 @@ from ctc_forced_aligner import (
 audio_path = "your/audio/path"
 text_path = "your/text/path"
 language = "iso" # ISO-639-3 Language code
-
-audio_waveform = load_audio(audio_path, model.dtype, model.device)
-    emissions, stride = generate_emissions(
-        model, audio_waveform, args.window_size, args.context_size, args.batch_size
-    )
-
-with open(text_path, "r") as f:
-    lines = f.readlines()
-text = "".join(line for line in lines).replace("\n", " ").strip()
+device = "cuda" if torch.cuda.is_available() else "cpu"
+# Optional Arguments
+window_size = 30
+context_size = 2
+batch_size = 4
 
 alignment_model, alignment_tokenizer, alignment_dictionary = load_alignment_model(
     device,
     dtype=torch.float16 if device == "cuda" else torch.float32,
 )
 
+audio_waveform = load_audio(audio_path, alignment_model.dtype, alignment_model.device)
+
+emissions, stride = generate_emissions(
+    alignment_model, audio_waveform, window_size, context_size, batch_size
+)
+
+with open(text_path, "r") as f:
+    lines = f.readlines()
+text = "".join(line for line in lines).replace("\n", " ").strip()
 
 emissions, stride = generate_emissions(
     alignment_model, audio_waveform, batch_size=batch_size
 )
-
 
 tokens_starred, text_starred = preprocess_text(
     text,
     romanize=True,
     language=language,
 )
-
 
 segments, scores, blank_id = get_alignments(
     emissions,
@@ -146,7 +150,6 @@ segments, scores, blank_id = get_alignments(
 spans = get_spans(tokens_starred, segments, alignment_tokenizer.decode(blank_id))
 
 word_timestamps = postprocess_results(text_starred, spans, stride, scores)
-
 ```
 
 </details>
