@@ -107,9 +107,9 @@ from ctc_forced_aligner import (
     postprocess_results,
 )
 
-audio_path = "20200128-Pieter Wuille (part 1 of 2) - Episode 1.mp3"
-text_path = "text.txt"
-language = "eng"  # ISO-639-3 Language code
+audio_path = "your/audio/path"
+text_path = "your/text/path"
+language = "iso" # ISO-639-3 Language code
 device = "cuda" if torch.cuda.is_available() else "cpu"
 batch_size = 16
 
