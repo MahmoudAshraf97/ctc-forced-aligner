@@ -2,6 +2,7 @@ import re
 import unicodedata
 import tempfile
 import os
+import subprocess
 from .norm_config import norm_config
 import numpy as np
 
@@ -144,28 +145,34 @@ def normalize_uroman(text):
 
 
 def get_uroman_tokens(norm_transcripts, iso=None):
-    tf = tempfile.NamedTemporaryFile()
-    tf2 = tempfile.NamedTemporaryFile()
-    with open(tf.name, "w") as f:
+    with tempfile.NamedTemporaryFile(mode="r+") as tf1, tempfile.NamedTemporaryFile(
+        mode="r+"
+    ) as tf2:
         for t in norm_transcripts:
-            f.write(t + "\n")
+            tf1.write(t + "\n")
+        tf1.seek(0)
 
-    assert os.path.exists(f"{UROMAN_PATH}/uroman.pl"), "uroman not found"
-    cmd = f"perl {UROMAN_PATH}/uroman.pl"
-    if iso in special_isos_uroman:
-        cmd += f" -l {iso} "
-    cmd += f" < {tf.name} > {tf2.name}"
-    os.system(cmd)
-    outtexts = []
-    with open(tf2.name) as f:
-        for line in f:
+        assert os.path.exists(
+            os.path.join(UROMAN_PATH, "uroman.pl")
+        ), "uroman not found"
+
+        cmd = ["perl", os.path.join(UROMAN_PATH, "uroman.pl")]
+        if iso in special_isos_uroman:
+            cmd.extend(["-l", iso])
+
+        subprocess.run(cmd, check=True, stdin=tf1, stdout=tf2)
+        outtexts = []
+
+        tf2.seek(0)
+        for line in tf2:
             line = " ".join(line.strip())
             line = re.sub(r"\s+", " ", line).strip()
             outtexts.append(line)
-    assert len(outtexts) == len(norm_transcripts)
-    uromans = []
-    for ot in outtexts:
-        uromans.append(normalize_uroman(ot))
+        assert len(outtexts) == len(norm_transcripts)
+        uromans = []
+        for ot in outtexts:
+            uromans.append(normalize_uroman(ot))
+            
     return uromans
 
 
