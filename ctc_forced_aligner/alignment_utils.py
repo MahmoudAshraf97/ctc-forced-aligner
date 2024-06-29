@@ -1,17 +1,16 @@
-import torch
-import torchaudio
 import math
 from dataclasses import dataclass
-from transformers import (
-    AutoModelForCTC,
-    AutoTokenizer,
-    __version__ as transformers_version,
-)
-from transformers.utils import is_flash_attn_2_available
-from .ctc_forced_aligner import forced_align as forced_align_cpp
 from typing import Optional, Tuple
-from packaging import version
+
 import numpy as np
+import torch
+import torchaudio
+from packaging import version
+from transformers import AutoModelForCTC, AutoTokenizer
+from transformers import __version__ as transformers_version
+from transformers.utils import is_flash_attn_2_available
+
+from .ctc_forced_aligner import forced_align as forced_align_cpp
 
 SAMPLING_FREQ = 16000
 

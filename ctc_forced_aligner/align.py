@@ -1,14 +1,16 @@
-import torch
+import json
 import os
+
+import torch
+
 from .alignment_utils import (
-    load_alignment_model,
-    load_audio,
     generate_emissions,
     get_alignments,
     get_spans,
+    load_alignment_model,
+    load_audio,
 )
-from .text_utils import preprocess_text, postprocess_results
-import json
+from .text_utils import postprocess_results, preprocess_text
 
 TORCH_DTYPES = {
     "bfloat16": torch.bfloat16,

@@ -1,10 +1,12 @@
-import re
-import unicodedata
-import tempfile
 import os
+import re
 import subprocess
-from .norm_config import norm_config
+import tempfile
+import unicodedata
+
 import numpy as np
+
+from .norm_config import norm_config
 
 UROMAN_PATH = os.path.join(os.path.dirname(__file__), "uroman", "bin")
 
@@ -172,7 +174,7 @@ def get_uroman_tokens(norm_transcripts, iso=None):
         uromans = []
         for ot in outtexts:
             uromans.append(normalize_uroman(ot))
-            
+
     return uromans
 
 

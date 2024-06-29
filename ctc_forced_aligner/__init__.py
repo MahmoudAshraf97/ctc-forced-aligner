@@ -1,18 +1,18 @@
 # flake8: noqa F401
 from .alignment_utils import (
-    load_alignment_model,
-    load_audio,
+    forced_align,
     generate_emissions,
     get_alignments,
     get_spans,
+    load_alignment_model,
+    load_audio,
     merge_repeats,
-    forced_align,
 )
 from .text_utils import (
-    preprocess_text,
-    postprocess_results,
-    text_normalize,
     get_uroman_tokens,
-    split_text,
     merge_segments,
+    postprocess_results,
+    preprocess_text,
+    split_text,
+    text_normalize,
 )

@@ -1,7 +1,6 @@
 import os
 import re
 
-
 colon = ":"
 comma = ","
 exclamation_mark = "!"
