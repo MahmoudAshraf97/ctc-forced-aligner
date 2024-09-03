@@ -1,7 +1,6 @@
 import os
 import re
 import subprocess
-import tempfile
 import unicodedata
 
 import numpy as np
@@ -147,33 +146,35 @@ def normalize_uroman(text):
 
 
 def get_uroman_tokens(norm_transcripts, iso=None):
-    with tempfile.NamedTemporaryFile(mode="r+") as tf1, tempfile.NamedTemporaryFile(
-        mode="r+"
-    ) as tf2:
-        for t in norm_transcripts:
-            tf1.write(t + "\n")
-        tf1.seek(0)
+    input_text = "\n".join(norm_transcripts) + "\n"
 
-        assert os.path.exists(
-            os.path.join(UROMAN_PATH, "uroman.pl")
-        ), "uroman not found"
+    assert os.path.exists(os.path.join(UROMAN_PATH, "uroman.pl")), "uroman not found"
 
-        cmd = ["perl", os.path.join(UROMAN_PATH, "uroman.pl")]
-        if iso in special_isos_uroman:
-            cmd.extend(["-l", iso])
+    assert not subprocess.call(
+        ["perl", "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+    ), (
+        "Please ensure that a valid perl installation exists,"
+        " you can verify by running `perl --version` in your terminal"
+    )
 
-        subprocess.run(cmd, check=True, stdin=tf1, stdout=tf2)
-        outtexts = []
+    cmd = ["perl", os.path.join(UROMAN_PATH, "uroman.pl")]
+    if iso in special_isos_uroman:
+        cmd.extend(["-l", iso])
 
-        tf2.seek(0)
-        for line in tf2:
-            line = " ".join(line.strip())
-            line = re.sub(r"\s+", " ", line).strip()
-            outtexts.append(line)
-        assert len(outtexts) == len(norm_transcripts)
-        uromans = []
-        for ot in outtexts:
-            uromans.append(normalize_uroman(ot))
+    result = subprocess.run(
+        cmd, input=input_text, text=True, capture_output=True, check=True
+    )
+    output_text = result.stdout
+
+    outtexts = []
+    for line in output_text.splitlines():
+        line = " ".join(line.strip())
+        line = re.sub(r"\s+", " ", line).strip()
+        outtexts.append(line)
+
+    assert len(outtexts) == len(norm_transcripts)
+
+    uromans = [normalize_uroman(ot) for ot in outtexts]
 
     return uromans
 
