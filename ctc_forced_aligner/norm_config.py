@@ -269,6 +269,7 @@ norm_config["tha"]["punc_set"] += r"\u200D"
 # =============== Arabic =============== #
 norm_config["ara"] = norm_config["*"].copy()
 norm_config["ara"]["mapping"]["ٱ"] = "ا"
+norm_config["ara"]["mapping"]["ٰ"] = "ا"
 norm_config["arb"] = norm_config["ara"].copy()
 
 # =============== Javanese =============== #
