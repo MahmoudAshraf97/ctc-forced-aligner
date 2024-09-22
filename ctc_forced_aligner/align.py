@@ -128,7 +128,7 @@ def cli():
     )
     args = parser.parse_args()
 
-    model, tokenizer, dictionary = load_alignment_model(
+    model, tokenizer = load_alignment_model(
         args.device,
         args.alignment_model,
         args.attn_implementation,
@@ -151,7 +151,7 @@ def cli():
     segments, scores, blank_id = get_alignments(
         emissions,
         tokens_starred,
-        dictionary,
+        tokenizer,
     )
 
     spans = get_spans(tokens_starred, segments, tokenizer.decode(blank_id))

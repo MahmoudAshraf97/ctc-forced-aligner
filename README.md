@@ -114,7 +114,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 batch_size = 16
 
 
-alignment_model, alignment_tokenizer, alignment_dictionary = load_alignment_model(
+alignment_model, alignment_tokenizer = load_alignment_model(
     device,
     dtype=torch.float16 if device == "cuda" else torch.float32,
 )
@@ -139,7 +139,7 @@ tokens_starred, text_starred = preprocess_text(
 segments, scores, blank_id = get_alignments(
     emissions,
     tokens_starred,
-    alignment_dictionary,
+    alignment_tokenizer,
 )
 
 spans = get_spans(tokens_starred, segments, alignment_tokenizer.decode(blank_id))

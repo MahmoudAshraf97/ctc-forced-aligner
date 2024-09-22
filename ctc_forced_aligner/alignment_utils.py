@@ -213,17 +213,21 @@ def forced_align(
 def get_alignments(
     emissions: torch.Tensor,
     tokens: list,
-    dictionary: dict,
+    tokenizer,
 ):
     assert len(tokens) > 0, "Empty transcript"
+
+    dictionary = tokenizer.get_vocab()
+    dictionary = {k.lower(): v for k, v in dictionary.items()}
+    dictionary["<star>"] = len(dictionary)
 
     # Force Alignment
     token_indices = [
         dictionary[c] for c in " ".join(tokens).split(" ") if c in dictionary
     ]
 
-    blank_id = dictionary.get("<blank>")
-    blank_id = dictionary.get("<pad>") if blank_id is None else blank_id
+    blank_id = dictionary.get("<blank>", tokenizer.pad_token_id)
+
     if emissions.is_cuda:
         emissions = emissions.cpu()
     targets = np.asarray([token_indices], dtype=np.int64)
@@ -268,8 +272,4 @@ def load_alignment_model(
     )
     tokenizer = AutoTokenizer.from_pretrained(model_path)
 
-    dictionary = tokenizer.get_vocab()
-    dictionary = {k.lower(): v for k, v in dictionary.items()}
-    dictionary["<star>"] = len(dictionary)
-
-    return model, tokenizer, dictionary
+    return model, tokenizer
