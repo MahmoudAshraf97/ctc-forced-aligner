@@ -118,6 +118,7 @@ def generate_emissions(
 ):
     # batching the input tensor and including a context before and after the input tensor
 
+    batch_size = min(batch_size, 1)
     context = context_length * SAMPLING_FREQ
     window = window_length * SAMPLING_FREQ
     extention = math.ceil(
@@ -239,8 +240,9 @@ def get_alignments(
     )
     path = path.squeeze().tolist()
 
-    segments = merge_repeats(path, {v: k for k, v in dictionary.items()})
-    return segments, scores, blank_id
+    idx_to_token_map = {v: k for k, v in dictionary.items()}
+    segments = merge_repeats(path, idx_to_token_map)
+    return segments, scores, idx_to_token_map[blank_id]
 
 
 def load_alignment_model(

@@ -148,13 +148,13 @@ def cli():
         text, args.romanize, args.language, args.split_size, args.star_frequency
     )
 
-    segments, scores, blank_id = get_alignments(
+    segments, scores, blank_token = get_alignments(
         emissions,
         tokens_starred,
         tokenizer,
     )
 
-    spans = get_spans(tokens_starred, segments, tokenizer.decode(blank_id))
+    spans = get_spans(tokens_starred, segments, blank_token)
 
     results = postprocess_results(
         text_starred, spans, stride, scores, args.merge_threshold
