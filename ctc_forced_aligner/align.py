@@ -126,6 +126,15 @@ def cli():
         default="cuda" if torch.cuda.is_available() else "cpu",
         help="if you have a GPU use 'cuda', otherwise 'cpu'",
     )
+
+    parser.add_argument(
+        "--output",
+        type=str,
+        choices=["file", "stdout"],
+        default="file",
+        help="Output target. 'file' will write a json file and a txt file with the same basename as the audio file. 'stdout' will print json to stdout.",
+    )
+
     args = parser.parse_args()
 
     model, tokenizer = load_alignment_model(
@@ -160,20 +169,29 @@ def cli():
         text_starred, spans, stride, scores, args.merge_threshold
     )
 
-    # write the results to a file
-    with open(f"{os.path.splitext(args.audio_path)[0]}.txt", "w") as f:
-        for result in results:
-            f.write(f"{result['start']}-{result['end']}: {result['text']}\n")
-    # write the results to a json file with the whole text and each segment
-    with open(f"{os.path.splitext(args.audio_path)[0]}.json", "w") as f:
-        json.dump(
-            {
-                "text": text,
-                "segments": results,
-            },
-            f,
-            indent=4,
-        )
+
+    output_strings = {}
+
+    output_strings['txt'] = ""
+    for result in results:
+        output_strings['txt'] += f"{result['start']}-{result['end']}: {result['text']}\n"
+
+    output_strings['json'] = json.dumps(
+                {
+                    "text": text,
+                    "segments": results,
+                },
+                indent=4,)
+
+    if args.output == "file":
+        # write the results to a file
+        with open(f"{os.path.splitext(args.audio_path)[0]}.txt", "w") as f:
+            f.write(output_strings['txt'])
+        # write the results to a json file with the whole text and each segment
+        with open(f"{os.path.splitext(args.audio_path)[0]}.json", "w") as f:
+            f.write(output_strings['json'])
+    elif args.output == "stdout":
+        print(output_strings['json'])
 
 
 if __name__ == "__main__":

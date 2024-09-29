@@ -71,6 +71,7 @@ ctc-forced-aligner --audio_path "path/to/audio.wav" --text_path "path/to/text.tx
 | `--context_size` | Overlap between chunks in seconds | 2 |
 | `--attn_implementation` | Attention implementation | "eager" |
 | `--device` | Device to use for inference: "cuda" or "cpu" | "cuda" if available, else "cpu" |
+| `--output` | Output target to write to. "file" writes to a .json and .txt file, while "stdout" prints json to stdout. | "file" |
 
 ### Examples
 
@@ -151,7 +152,7 @@ word_timestamps = postprocess_results(text_starred, spans, stride, scores)
 
 ### Output
 
-The alignment results will be saved to a file containing the following information in JSON format:
+The alignment results will be saved to a file (or printed to stdout, depending on args) containing the following information in JSON format:
 
 - **`text`:** The aligned text.
 - **`segments`:** A list of segments, each containing the start and end time of the corresponding text segment.
