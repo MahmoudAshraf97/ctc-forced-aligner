@@ -143,7 +143,9 @@ def generate_emissions(
     ]  # removing the context
     emissions = emissions.flatten(0, 1)
     if extention > 0:
-        emissions = emissions[: -time_to_frame(extention / SAMPLING_FREQ), :]
+        new_emissions = emissions[: -time_to_frame(extention / SAMPLING_FREQ), :]
+        if new_emissions.size(0) > 0:  # Only reassign emissions if the new tensor is not empty
+            emissions = new_emissions
 
     emissions = torch.log_softmax(emissions, dim=-1)
     emissions = torch.cat(
