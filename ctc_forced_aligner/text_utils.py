@@ -168,18 +168,21 @@ def get_uroman_tokens(norm_transcripts, iso=None):
 
     outtexts = []
     for line in output_text.splitlines():
-        line = " ".join(line.strip())
+        line = "<star>" if line == "<star>" else " ".join(line.strip())
         line = re.sub(r"\s+", " ", line).strip()
         outtexts.append(line)
 
     assert len(outtexts) == len(norm_transcripts)
 
-    uromans = [normalize_uroman(ot) for ot in outtexts]
+    uromans = [
+        "<star>" if ot == "<star>" else normalize_uroman(ot)
+        for ot in outtexts
+    ]
 
     return uromans
 
 
-def split_text(text: str, split_size: str = "word"):
+def split_text(text: str, split_size: str = "word", star_frequency: str = "segment"):
 
     if split_size == "sentence":
         from nltk.tokenize import PunktSentenceTokenizer
@@ -189,8 +192,14 @@ def split_text(text: str, split_size: str = "word"):
         return sentences
 
     elif split_size == "word":
+        if star_frequency ==  "custom":
+            pattern = r"\s+|(<star>)"
+            return [word for word in re.split(pattern, text) if word]
         return text.split()
     elif split_size == "char":
+        if star_frequency ==  "custom":
+            pattern = r"(<star>|.)"
+            return [char for char in re.split(pattern, text) if char]
         return list(text)
 
 
@@ -205,16 +214,30 @@ def preprocess_text(
     assert star_frequency in [
         "segment",
         "edges",
+        "custom",
     ], "Star frequency must be segment or edges"
+
+    assert not (split_size == "sentence" and star_frequency == "custom"), \
+    "Custom <star> frequency in the sentence split_size is not supported"
+
     if language in ["jpn", "chi"]:
         split_size = "char"
-    text_split = split_text(text, split_size)
-    norm_text = [text_normalize(line.strip(), language) for line in text_split]
+    text_split = split_text(text, split_size, star_frequency)
+    norm_text = [
+        "<star>" if line == "<star>" else text_normalize(line.strip(), language)
+        for line in text_split
+    ]
 
     if romanize:
         tokens = get_uroman_tokens(norm_text, language)
     else:
-        tokens = [" ".join(list(word)) for word in norm_text]
+        tokens = [
+            "<star>" if word == "<star>" else " ".join(list(word))
+            for word in norm_text
+        ]
+
+    tokens_starred = tokens
+    text_starred = text_split
 
     # add <star> token to the tokens and text
     # it's used extensively here but I found that it produces more accurate results

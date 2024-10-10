@@ -59,11 +59,12 @@ def cli():
         "--star_frequency",
         type=str,
         default="edges",
-        choices=["segment", "edges"],
+        choices=["segment", "edges", "custom"],
         help="The frequency of the <star> token in the text."
         "Star token increases the accuracy of the alignment but also increases segment fragmentation."
         "segment adds <star> token after each segment."
         "edges adds <star> token at the start and end of the text."
+        "custom uses the <star> tokens predefined by user in the input text"
         "use --merge_threshold to merge segments that are closer than the threshold.",
     )
     parser.add_argument(

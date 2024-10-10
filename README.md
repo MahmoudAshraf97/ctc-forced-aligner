@@ -62,7 +62,7 @@ ctc-forced-aligner --audio_path "path/to/audio.wav" --text_path "path/to/text.tx
 | `--language` | Language in ISO 639-3 code | Required |
 | `--romanize` | Enable romanization for non-latin scripts or for multilingual models regardless of the language, required when using the default model| False |
 | `--split_size` | Alignment granularity: "sentence", "word", or "char" | "word" |
-| `--star_frequency` | Frequency of `<star>` token: "segment" or "edges" | "edges" |
+| `--star_frequency` | Frequency of `<star>` token: "custom", "segment" or "edges" | "edges" |
 | `--merge_threshold` | Merge threshold for segment merging | 0.00 |
 | `--alignment_model` | Name of the alignment model | [MahmoudAshraf/mms-300m-1130-forced-aligner](https://huggingface.co/MahmoudAshraf/mms-300m-1130-forced-aligner) |
 | `--compute_dtype` | Compute dtype for inference | "float32" |
