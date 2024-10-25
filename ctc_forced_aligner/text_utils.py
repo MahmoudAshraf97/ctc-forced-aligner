@@ -195,7 +195,7 @@ def split_text(text: str, split_size: str = "word"):
 
 
 def preprocess_text(
-    text, romanize, language, split_size="word", star_frequency="segment"
+    lines, text, romanize, language, split_size="word", star_frequency="segment", preserve_split=False
 ):
     assert split_size in [
         "sentence",
@@ -208,7 +208,11 @@ def preprocess_text(
     ], "Star frequency must be segment or edges"
     if language in ["jpn", "chi"]:
         split_size = "char"
-    text_split = split_text(text, split_size)
+
+    if preserve_split:
+        text_split = [s.rstrip("\n") for s in lines]
+    else:
+        text_split = split_text(text, split_size)
     norm_text = [text_normalize(line.strip(), language) for line in text_split]
 
     if romanize:
