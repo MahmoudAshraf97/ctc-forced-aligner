@@ -162,7 +162,12 @@ def get_uroman_tokens(norm_transcripts, iso=None):
         cmd.extend(["-l", iso])
 
     result = subprocess.run(
-        cmd, input=input_text, text=True, capture_output=True, check=True
+        cmd,
+        input=input_text,
+        text=True,
+        capture_output=True,
+        check=True,
+        encoding="utf-8",
     )
     output_text = result.stdout
 
