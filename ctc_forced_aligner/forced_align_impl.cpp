@@ -4,8 +4,21 @@
 
 namespace py = pybind11;
 
-void segfault_handler(int signal) {
-    throw std::runtime_error("Segmentation fault occurred");
+// Custom exception hierarchy
+class CTCAlignmentError : public std::runtime_error {
+    using std::runtime_error::runtime_error;
+};
+
+class CTCSegmentationError : public CTCAlignmentError {
+    using CTCAlignmentError::CTCAlignmentError;
+};
+
+class CTCLengthError : public CTCAlignmentError {
+    using CTCAlignmentError::CTCAlignmentError;
+};
+
+[[noreturn]] void segfault_handler([[maybe_unused]] int signal) {
+    throw CTCSegmentationError("Segmentation fault occurred");
 }
 
 template <typename scalar_t, typename target_t>
@@ -35,7 +48,7 @@ void forced_align_impl(
     // Add bounds checking function
     auto check_bounds = [](size_t index, size_t size, const char* msg) {
         if (index >= size) {
-            throw std::runtime_error(msg);
+            throw CTCAlignmentError(msg);
         }
     };
 
@@ -47,7 +60,7 @@ void forced_align_impl(
     }
 
     if (T < L + R) {
-        throw std::runtime_error("targets length is too long for CTC.");
+        throw CTCLengthError("targets length is too long for CTC.");
     }
 
     auto start = T - (L + R) > 0 ? 0 : 1;
@@ -56,6 +69,7 @@ void forced_align_impl(
       auto labelIdx = (i % 2 == 0) ? blank : targets_data(batchIndex, i / 2);
       alphas[i] = logProbs_data(batchIndex, 0, labelIdx);
     }
+
     unsigned long long seek = 0;
     for (auto t = 1; t < T; t++) {
       if (T - t <= L + R) {
@@ -127,6 +141,8 @@ void forced_align_impl(
       // Calculate backPtr value from bits
       ltrIdx -= (backPtrBit1[backPtr_idx] << 1) | backPtrBit0[backPtr_idx];
     }
+  } catch (const CTCAlignmentError& e) {
+    throw py::value_error(std::string("CTC alignment failed: ") + e.what());
   } catch (const std::exception& e) {
     throw py::value_error(std::string("Forced alignment failed: ") + e.what());
   } catch (...) {
@@ -139,9 +155,9 @@ std::tuple<py::array_t<int64_t>, py::array_t<float>> compute(
     const py::array_t<int64_t>& targets,
     const int64_t blank) {
   try {
-    if (logProbs.ndim() != 3) throw std::runtime_error("log_probs must be a 3-D array.");
-    if (targets.ndim() != 2) throw std::runtime_error("targets must be a 2-D array.");
-    if (logProbs.shape(0) != 1) throw std::runtime_error("Batch size must be 1.");
+    if (logProbs.ndim() != 3) throw CTCAlignmentError("log_probs must be a 3-D array.");
+    if (targets.ndim() != 2) throw CTCAlignmentError("targets must be a 2-D array.");
+    if (logProbs.shape(0) != 1) throw CTCAlignmentError("Batch size must be 1.");
 
     const auto B = logProbs.shape(0);
     const auto T = logProbs.shape(1);
@@ -159,6 +175,8 @@ std::tuple<py::array_t<int64_t>, py::array_t<float>> compute(
     }
 
     return std::make_tuple(paths, scores);
+  } catch (const CTCAlignmentError& e) {
+    throw py::value_error(std::string("CTC alignment failed: ") + e.what());
   } catch (const std::exception& e) {
     throw py::value_error(std::string("Compute failed: ") + e.what());
   }
