@@ -1,4 +1,8 @@
 <h1 align="center">Forced Alignment with Hugging Face CTC Models</h1>
+
+[![FreePalestine.Dev](https://freepalestine.dev/header/1)](https://freepalestine.dev)
+
+
 <p align="center">
   <a href="https://github.com/MahmoudAshraf97/ctc-forced-aligner/actions/workflows/test_build.yml">
     <img src="https://github.com/MahmoudAshraf97/ctc-forced-aligner/actions/workflows/test_build.yml/badge.svg"
