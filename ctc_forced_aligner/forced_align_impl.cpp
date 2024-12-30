@@ -22,8 +22,6 @@ void forced_align_impl(
   // Replace backPtr tensor with two std::vector<bool>
   // allocate memory based on the expected needed size which is approximately
   // S * (T-L), we will use a safety margin of (T-L) to avoid reallocation
-  std::vector<bool> backPtrBit0((S + 1) * (T - L), false);
-  std::vector<bool> backPtrBit1((S + 1) * (T - L), false);
   std::vector<unsigned long long> backPtr_offset(T - 1);
   std::vector<unsigned long long> backPtr_seek(T - 1);
 
@@ -41,6 +39,8 @@ void forced_align_impl(
   if (T < L + R) {
       throw std::runtime_error("targets length is too long for CTC.");
   }
+  std::vector<bool> backPtrBit0((S + 1) * (T - L), false);
+  std::vector<bool> backPtrBit1((S + 1) * (T - L), false);
 
   auto start = T - (L + R) > 0 ? 0 : 1;
   auto end = (S == 1) ? 1 : 2;
