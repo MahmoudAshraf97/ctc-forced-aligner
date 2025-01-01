@@ -14,10 +14,12 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-20.04, windows-2019]
-        arch: [auto64, arm64]
+        arch: [auto64]
         include:
-        # - os: ubuntu-20.04
-        #   arch: aarch64
+        - os: ubuntu-20.04
+          arch: aarch64
+        - os: windows-2019
+          arch: aarch64
         - os: macos-13
           arch: arm64
 
