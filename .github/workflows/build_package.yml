@@ -26,14 +26,13 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: docker/setup-qemu-action@v2
+      - uses: docker/setup-qemu-action@v3
         if: ${{ matrix.arch == 'aarch64' }}
         name: Set up QEMU
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.21.3
+        uses: pypa/cibuildwheel@v2.22
         with:
-          package-dir: ctc_forced_aligner
           output-dir: python/wheelhouse
         env:
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
