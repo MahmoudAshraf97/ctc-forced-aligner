@@ -19,7 +19,7 @@ jobs:
         - os: ubuntu-20.04
           arch: aarch64
         - os: windows-2019
-          arch: arm64
+          arch: ARM64
         - os: macos-13
           arch: arm64
 
