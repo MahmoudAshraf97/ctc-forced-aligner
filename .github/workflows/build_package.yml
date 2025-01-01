@@ -28,9 +28,9 @@ jobs:
         with:
           submodules: recursive
 
-      # - uses: docker/setup-qemu-action@v3
-      #   if: ${{ matrix.arch == 'aarch64' }}
-      #   name: Set up QEMU
+      - uses: docker/setup-qemu-action@v3
+        if: ${{ matrix.arch == 'aarch64' }}
+        name: Set up QEMU
 
       - name: Setup UV
         uses: astral-sh/setup-uv@v5
