@@ -116,7 +116,7 @@ def generate_emissions(
     context_length=2,
     batch_size=4,
 ):
-    batch_size = min(batch_size, 1)
+    batch_size = max(batch_size, 1)
     window = int(window_length * SAMPLING_FREQ)
     if audio_waveform.size(0) > window:
         extension = 0
