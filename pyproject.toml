@@ -31,3 +31,11 @@ ctc-forced-aligner = "ctc_forced_aligner.align:cli"
     "uroman/data/**/*.*",
     "uroman/lib/**/*.*",
 ]
+
+[tool.flake8]
+max-line-length = 100
+ignore = ["E203", "W503"]
+
+[tool.isort]
+profile = "black"
+lines_between_types = 1
