@@ -117,7 +117,7 @@ jobs:
       - name: Install wheel
         shell: bash
         run: |
-          wheel_name=$(grep -rl "$(echo ${{ matrix.python-version }} | tr -d '.')" wheels)
+          wheel_name=$(find wheels -type f -name "*$(echo ${{ matrix.python-version }} | tr -d '.')*")
           pip install "$wheel_name[dev]"
 
       - name: Run tests
