@@ -128,7 +128,7 @@ jobs:
             PYTHON_VERSION: ${{ matrix.python-version }}
         shell: bash
         run: |
-          wheel_name=grep -rl "$(echo $version | tr -d '.')" wheels
+          wheel_name=$(grep -rl "$(echo $version | tr -d '.')" wheels)
           pip install "$wheel_name[dev]"
 
       - name: Run tests
