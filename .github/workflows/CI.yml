@@ -118,17 +118,17 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           version: "latest"
-          
+
       - name: Install wheel
         shell: bash
         run: |
           wheel_name=$(find wheels -type f -name "*$(echo ${{ matrix.python-version }} | tr -d '.')*")
-          uv pip install --system "$wheel_name[dev]" --extra-index-url https://download.pytorch.org/whl/cpu
+          uv pip install --system "pytest-xdist" "$wheel_name[dev]" --extra-index-url https://download.pytorch.org/whl/cpu
 
       - name: Run tests
         shell: bash
         run: |
-          pytest -v tests/
+          pytest -v -n 2 tests/
 
   publish-python-wheels-on-pypi:
     needs: [test-python-wheels]
