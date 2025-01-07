@@ -83,7 +83,7 @@ jobs:
       - name: Upload Python wheels
         uses: actions/upload-artifact@v4
         with:
-          name: python-wheels-${{ runner.os }}-${{ matrix.arch }}-${{ matrix.python-version }}
+          name: python-wheels-${{ runner.os }}-${{ matrix.arch }}
           path: python/wheelhouse
 
   test-python-wheels:
@@ -93,14 +93,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: ["3.10"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
         os: [ubuntu-20.04, windows-2019, macos-14]
         arch: [auto64]
-        # include:
-        # - os: ubuntu-20.04
-          # arch: aarch64
-        # - os: windows-2019
-          # arch: ARM64
 
     steps:
       - uses: actions/checkout@v4
