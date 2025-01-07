@@ -15,6 +15,9 @@ requires-python = ">= 3.9"
 version = {attr = "ctc_forced_aligner.__version__"}
 dependencies = {file = ["requirements.txt"]}
 
+[project.optional-dependencies]
+dev = ["black==24.*", "flake8==7.*", "isort==5.*", "pytest==7.*"]
+
 [project.urls]
 repository = "https://github.com/MahmoudAshraf97/ctc-forced-aligner"
 
