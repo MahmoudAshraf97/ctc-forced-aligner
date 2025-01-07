@@ -47,7 +47,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, windows-2019]
+        # os: [ubuntu-20.04, windows-2019,]
+        os: [ubuntu-20.04]
         arch: [auto64]
         include:
         # - os: ubuntu-20.04
@@ -124,11 +125,9 @@ jobs:
           path: wheels
 
       - name: Install wheel
-        env:
-            PYTHON_VERSION: ${{ matrix.python-version }}
         shell: bash
         run: |
-          wheel_name=$(grep -rl "$(echo $version | tr -d '.')" wheels)
+          wheel_name=$(grep -rl "$(echo ${{ matrix.python-version }} | tr -d '.')" wheels)
           pip install "$wheel_name[dev]"
 
       - name: Run tests
