@@ -1,10 +1,12 @@
 import math
+
 from dataclasses import dataclass
 from typing import Optional, Tuple
 
 import numpy as np
 import torch
 import torchaudio
+
 from packaging import version
 from transformers import AutoModelForCTC, AutoTokenizer
 from transformers import __version__ as transformers_version

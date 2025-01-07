@@ -73,12 +73,15 @@ def text_normalize(
     normalized_text = re.sub(delete_patten, "", normalized_text)
 
     # Remove words containing only digits
-    # We check for 3 cases  a)text starts with a number b) a number is present somewhere in the middle of the text c) the text ends with a number
-    # For each case we use lookaround regex pattern to see if the digit pattern in preceded and followed by whitespaces, only then we replace the numbers with space
+    # We check for 3 cases:
+    #   a)text starts with a number
+    #   b) a number is present somewhere in the middle of the text
+    #   c) the text ends with a number
+    # For each case we use lookaround regex pattern to see if the digit pattern in preceded
+    # and followed by whitespaces, only then we replace the numbers with space
     # The lookaround enables overlapping pattern matches to be replaced
 
     if remove_numbers:
-
         digits_pattern = r"[" + config["digit_set"]
 
         digits_pattern += r"]+"
@@ -185,7 +188,6 @@ def get_uroman_tokens(norm_transcripts, iso=None):
 
 
 def split_text(text: str, split_size: str = "word"):
-
     if split_size == "sentence":
         from nltk.tokenize import PunktSentenceTokenizer
 
@@ -225,7 +227,6 @@ def preprocess_text(
     # it's used extensively here but I found that it produces more accurate results
     # and doesn't affect the runtime
     if star_frequency == "segment":
-
         tokens_starred = []
         [tokens_starred.extend(["<star>", token]) for token in tokens]
 
