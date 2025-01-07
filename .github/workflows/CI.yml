@@ -54,7 +54,6 @@ jobs:
           arch: aarch64
         - os: windows-2019
           arch: ARM64
-        python-version: [cp38, cp39, cp310, cp311, cp312, cp313]
 
     steps:
       - uses: actions/checkout@v4
@@ -75,7 +74,6 @@ jobs:
         with:
           output-dir: python/wheelhouse
         env:
-          CIBW_BUILD: ${{ matrix.python-version }}-*
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
           CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
           CIBW_ARCHS: ${{ matrix.arch }}
