@@ -121,11 +121,11 @@ jobs:
         with:
           pattern: python-wheels-${{ runner.os }}-${{ matrix.arch }}
           merge-multiple: true
-          path: .
+          path: wheels
 
       - name: Install wheel
         run: |
-          pip install "$(grep -rl "$(echo ${{ matrix.python-version }} | tr -d '.')" .)[dev]"
+          pip install "$(grep -rl "$(echo ${{ matrix.python-version }} | tr -d 'wheels')" .)[dev]"
 
       - name: Run tests
         shell: bash
