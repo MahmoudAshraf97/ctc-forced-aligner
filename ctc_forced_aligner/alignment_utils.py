@@ -118,7 +118,7 @@ def generate_emissions(
 ):
     batch_size = max(batch_size, 1)
     window = int(window_length * SAMPLING_FREQ)
-    if audio_waveform.size(0) > window:
+    if audio_waveform.size(0) < window:
         extension = 0
         context = 0
         input_tensor = audio_waveform.unsqueeze(0)
