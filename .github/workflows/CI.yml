@@ -124,8 +124,10 @@ jobs:
           path: wheels
 
       - name: Install wheel
+        shell: bash
         run: |
-          pip install "$(grep -rl "$(echo ${{ matrix.python-version }} | tr -d '.')" wheels)[dev]"
+          version="${{ matrix.python-version }}"
+          pip install "$(grep -rl "$(echo $version | tr -d '.')" wheels)[dev]"
 
       - name: Run tests
         shell: bash
