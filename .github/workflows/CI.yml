@@ -26,7 +26,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv pip install black==24.* flake8==7.* isort==5.*
+          uv pip install --system black==24.* flake8==7.* isort==5.*
 
       - name: Check code format with Black
         run: |
