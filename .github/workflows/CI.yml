@@ -125,7 +125,7 @@ jobs:
 
       - name: Install wheel
         run: |
-          pip install "$(grep -rl "$(echo ${{ matrix.python-version }} | tr -d 'wheels')" .)[dev]"
+          pip install "$(grep -rl "$(echo ${{ matrix.python-version }} | tr -d '.')" wheels)[dev]"
 
       - name: Run tests
         shell: bash
