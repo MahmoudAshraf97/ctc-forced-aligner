@@ -5,7 +5,7 @@
 
 <p align="center">
   <a href="https://github.com/MahmoudAshraf97/ctc-forced-aligner/actions/workflows/test_build.yml">
-    <img src="https://github.com/MahmoudAshraf97/ctc-forced-aligner/actions/workflows/test_build.yml/badge.svg"
+    <img src="https://github.com/MahmoudAshraf97/ctc-forced-aligner/actions/workflows/CI.yml/badge.svg"
          alt="Build Status">
   </a>
   <a href="https://github.com/MahmoudAshraf97/ctc-forced-aligner/stargazers">
