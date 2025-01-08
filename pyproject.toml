@@ -4,15 +4,19 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ctc-forced-aligner"
-version = "0.2"
 description = "Text to speech alignment using CTC forced alignment"
 license = { text = "CC-BY-NC 4.0" }
 authors = [
   {name = "Mahmoud Ashraf", email = "hassouna97.ma@gmail.com"},]
-dynamic = ["dependencies"]
+dynamic = ["version", "dependencies"]
+requires-python = ">= 3.9"
 
 [tool.setuptools.dynamic]
+version = {attr = "ctc_forced_aligner.__version__"}
 dependencies = {file = ["requirements.txt"]}
+
+[project.optional-dependencies]
+dev = ["black==23.*", "flake8==7.*", "flake8-pyproject==1.*", "isort==5.*", "pytest==7.*"]
 
 [project.urls]
 repository = "https://github.com/MahmoudAshraf97/ctc-forced-aligner"
@@ -27,3 +31,11 @@ ctc-forced-aligner = "ctc_forced_aligner.align:cli"
     "uroman/data/**/*.*",
     "uroman/lib/**/*.*",
 ]
+
+[tool.flake8]
+max-line-length = 100
+ignore = ["E203", "W503"]
+
+[tool.isort]
+profile = "black"
+lines_between_types = 1
