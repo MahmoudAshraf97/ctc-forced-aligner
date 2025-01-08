@@ -241,8 +241,13 @@ def get_alignments(
         emissions = emissions.cpu()
     targets = np.asarray([token_indices], dtype=np.int64)
 
+    if 'mps' in str(emissions.device):
+        emissions_numpy = emissions.unsqueeze(0).float().cpu().numpy()
+    else:
+        emissions_numpy = emissions.unsqueeze(0).float().numpy()
+
     path, scores = forced_align(
-        emissions.unsqueeze(0).float().numpy(),
+        emissions_numpy,
         targets,
         blank=blank_id,
     )
