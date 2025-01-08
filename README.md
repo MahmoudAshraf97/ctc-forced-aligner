@@ -235,7 +235,6 @@ The alignment results will be saved to a file containing the following informati
   ]
 }
 ```
-
 </details>
 
 
