@@ -237,7 +237,7 @@ def get_alignments(
 
     blank_id = dictionary.get("<blank>", tokenizer.pad_token_id)
 
-    if emissions.is_cuda:
+    if not emissions.is_cpu:
         emissions = emissions.cpu()
     targets = np.asarray([token_indices], dtype=np.int64)
 
