@@ -237,17 +237,12 @@ def get_alignments(
 
     blank_id = dictionary.get("<blank>", tokenizer.pad_token_id)
 
-    if emissions.is_cuda:
+    if not emissions.is_cpu:
         emissions = emissions.cpu()
     targets = np.asarray([token_indices], dtype=np.int64)
 
-    if 'mps' in str(emissions.device):
-        emissions_numpy = emissions.unsqueeze(0).float().cpu().numpy()
-    else:
-        emissions_numpy = emissions.unsqueeze(0).float().numpy()
-
     path, scores = forced_align(
-        emissions_numpy,
+        emissions.unsqueeze(0).float().numpy(),
         targets,
         blank=blank_id,
     )
