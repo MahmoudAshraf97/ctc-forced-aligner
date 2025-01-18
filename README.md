@@ -43,10 +43,6 @@ This Python package provides an efficient way to perform forced alignment betwee
 
 ### Installation
 
-#### Precompiled from PyPI
-```bash
-pip install ctc-forced-aligner
-```
 #### Latest version from GitHub
 ```bash
 pip install git+https://github.com/MahmoudAshraf97/ctc-forced-aligner.git
