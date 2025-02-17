@@ -1,5 +1,5 @@
 from pybind11.setup_helpers import Pybind11Extension, build_ext
-from setuptools import setup
+from setuptools import setup, find_packages
 import sys
 
 ext_modules = [
@@ -11,6 +11,15 @@ ext_modules = [
 ]
 
 setup(
+    name="ctc_forced_aligner",
+    version="0.3.0",
+    packages=find_packages(),
     ext_modules=ext_modules,
+    package_data={
+        "ctc_forced_aligner": ["punctuations.lst"],
+        "README.md": ["README.md"],
+        "LICENSE": ["LICENSE"],
+    },
+    include_package_data=True,
     cmdclass={"build_ext": build_ext},
 )
