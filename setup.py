@@ -16,7 +16,7 @@ setup(
     packages=find_packages(),
     ext_modules=ext_modules,
     package_data={
-        "ctc_forced_aligner": ["punctuations.lst"],
+        "ctc_forced_aligner": ["punctuations.lst", "uroman/bin/*", "uroman/data/*", "uroman/lib/*"],
         "README.md": ["README.md"],
         "LICENSE": ["LICENSE"],
     },
