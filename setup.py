@@ -12,7 +12,7 @@ ext_modules = [
 
 setup(
     name="ctc_forced_aligner",
-    version="0.3.0",
+    version="0.3.1",
     packages=find_packages(),
     ext_modules=ext_modules,
     package_data={

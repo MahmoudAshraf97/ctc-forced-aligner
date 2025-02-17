@@ -17,4 +17,4 @@ from .text_utils import (
     text_normalize,
 )
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
