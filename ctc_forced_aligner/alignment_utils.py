@@ -144,11 +144,13 @@ def generate_emissions(
             emissions_ = model(input_batch).logits
             emissions_arr.append(emissions_)
 
-    emissions = torch.cat(emissions_arr, dim=0).flatten(0, 1)
+    emissions = torch.cat(emissions_arr, dim=0)
     if context > 0:
         emissions = emissions[
+            :,
             time_to_frame(context_length) : -time_to_frame(context_length) + 1,
         ]  # removing the context
+    emissions = emissions.flatten(0, 1)
 
     if time_to_frame(extension / SAMPLING_FREQ) > 0:
         emissions = emissions[: -time_to_frame(extension / SAMPLING_FREQ)]
