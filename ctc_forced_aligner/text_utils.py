@@ -1,13 +1,13 @@
-import os
 import re
-import subprocess
 import unicodedata
 
 import numpy as np
 
+from uroman import Uroman
+
 from .norm_config import norm_config
 
-UROMAN_PATH = os.path.join(os.path.dirname(__file__), "uroman", "bin")
+uroman_instance = Uroman()
 
 
 def text_normalize(
@@ -148,41 +148,20 @@ def normalize_uroman(text):
     return text.strip()
 
 
-def get_uroman_tokens(norm_transcripts, iso=None):
-    input_text = "\n".join(norm_transcripts) + "\n"
+def get_uroman_tokens(norm_transcripts: list[str], iso=None):
+    outtexts = [
+        uroman_instance.romanize_string(transcript, lcode=iso)
+        for transcript in norm_transcripts
+    ]
 
-    assert os.path.exists(os.path.join(UROMAN_PATH, "uroman.pl")), "uroman not found"
+    uromans = []
+    for ot in outtexts:
+        ot = " ".join(ot.strip())
+        ot = re.sub(r"\s+", " ", ot).strip()
+        normalized = normalize_uroman(ot)
+        uromans.append(normalized)
 
-    assert not subprocess.call(
-        ["perl", "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-    ), (
-        "Please ensure that a valid perl installation exists,"
-        " you can verify by running `perl --version` in your terminal"
-    )
-
-    cmd = ["perl", os.path.join(UROMAN_PATH, "uroman.pl")]
-    if iso in special_isos_uroman:
-        cmd.extend(["-l", iso])
-
-    result = subprocess.run(
-        cmd,
-        input=input_text,
-        text=True,
-        capture_output=True,
-        check=True,
-        encoding="utf-8",
-    )
-    output_text = result.stdout
-
-    outtexts = []
-    for line in output_text.splitlines():
-        line = " ".join(line.strip())
-        line = re.sub(r"\s+", " ", line).strip()
-        outtexts.append(line)
-
-    assert len(outtexts) == len(norm_transcripts)
-
-    uromans = [normalize_uroman(ot) for ot in outtexts]
+    assert len(uromans) == len(norm_transcripts)
 
     return uromans
 

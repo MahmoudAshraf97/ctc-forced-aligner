@@ -27,9 +27,6 @@ ctc-forced-aligner = "ctc_forced_aligner.align:cli"
 [tool.setuptools.package-data]
 "*" = [
     "punctuations.lst",
-    "uroman/bin/**/*.*",
-    "uroman/data/**/*.*",
-    "uroman/lib/**/*.*",
 ]
 
 [tool.flake8]
