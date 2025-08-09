@@ -148,7 +148,7 @@ def normalize_uroman(text):
     return text.strip()
 
 
-def get_uroman_tokens(norm_transcripts: list[str], iso: str | None = None):
+def get_uroman_tokens(norm_transcripts: list[str], iso=None):
     outtexts = [
         uroman_instance.romanize_string(transcript, lcode=iso)
         for transcript in norm_transcripts
