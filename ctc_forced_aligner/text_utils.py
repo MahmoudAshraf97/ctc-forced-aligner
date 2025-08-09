@@ -3,8 +3,9 @@ import unicodedata
 
 import numpy as np
 
-from .norm_config import norm_config
 from uroman import Uroman
+
+from .norm_config import norm_config
 
 uroman_instance = Uroman()
 
@@ -147,7 +148,7 @@ def normalize_uroman(text):
     return text.strip()
 
 
-def get_uroman_tokens(norm_transcripts, iso=None):
+def get_uroman_tokens(norm_transcripts: list[str], iso: str | None = None):
     outtexts = [
         uroman_instance.romanize_string(transcript, lcode=iso)
         for transcript in norm_transcripts
@@ -155,12 +156,12 @@ def get_uroman_tokens(norm_transcripts, iso=None):
 
     uromans = []
     for ot in outtexts:
+        ot = " ".join(ot.strip())
+        ot = re.sub(r"\s+", " ", ot).strip()
         normalized = normalize_uroman(ot)
-        # Split into individual characters separated by spaces
-        char_separated = " ".join(normalized)
-        # Clean up multiple spaces
-        char_separated = re.sub(r"\s+", " ", char_separated).strip()
-        uromans.append(char_separated)
+        uromans.append(normalized)
+
+    assert len(uromans) == len(norm_transcripts)
 
     return uromans
 
