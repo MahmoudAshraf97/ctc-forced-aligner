@@ -16,10 +16,10 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Set up Python 3.9
+      - name: Set up Python 3.10
         uses: actions/setup-python@v5
         with:
-          python-version: 3.9
+          python-version: 3.10
 
       - name: Setup UV
         uses: astral-sh/setup-uv@v5
@@ -50,9 +50,9 @@ jobs:
         os: [ubuntu-22.04, windows-2022, macos-14]
         arch: [auto64]
         include:
-        - os: ubuntu-20.04
+        - os: ubuntu-22.04
           arch: aarch64
-        - os: windows-2019
+        - os: windows-2022
           arch: ARM64
 
     steps:
@@ -93,8 +93,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
-        os: [ubuntu-20.04, windows-2019, macos-14]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        os: [ubuntu-22.04, windows-2022, macos-14]
         arch: [auto64]
 
     steps:
