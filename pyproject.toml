@@ -9,7 +9,7 @@ license = { text = "CC-BY-NC 4.0" }
 authors = [
   {name = "Mahmoud Ashraf", email = "hassouna97.ma@gmail.com"},]
 dynamic = ["version", "dependencies"]
-requires-python = ">= 3.9"
+requires-python = ">= 3.10"
 
 [tool.setuptools.dynamic]
 version = {attr = "ctc_forced_aligner.__version__"}
