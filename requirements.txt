@@ -1,3 +1,4 @@
+uroman
 nltk
 torch
 torchaudio

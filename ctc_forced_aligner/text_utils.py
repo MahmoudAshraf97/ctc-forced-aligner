@@ -1,13 +1,13 @@
-import os
 import re
-import subprocess
 import unicodedata
 
 import numpy as np
 
+from uroman import Uroman
+
 from .norm_config import norm_config
 
-UROMAN_PATH = os.path.join(os.path.dirname(__file__), "uroman", "bin")
+uroman_instance = Uroman()
 
 
 def text_normalize(
@@ -73,12 +73,15 @@ def text_normalize(
     normalized_text = re.sub(delete_patten, "", normalized_text)
 
     # Remove words containing only digits
-    # We check for 3 cases  a)text starts with a number b) a number is present somewhere in the middle of the text c) the text ends with a number
-    # For each case we use lookaround regex pattern to see if the digit pattern in preceded and followed by whitespaces, only then we replace the numbers with space
+    # We check for 3 cases:
+    #   a)text starts with a number
+    #   b) a number is present somewhere in the middle of the text
+    #   c) the text ends with a number
+    # For each case we use lookaround regex pattern to see if the digit pattern in preceded
+    # and followed by whitespaces, only then we replace the numbers with space
     # The lookaround enables overlapping pattern matches to be replaced
 
     if remove_numbers:
-
         digits_pattern = r"[" + config["digit_set"]
 
         digits_pattern += r"]+"
@@ -145,42 +148,25 @@ def normalize_uroman(text):
     return text.strip()
 
 
-def get_uroman_tokens(norm_transcripts, iso=None):
-    input_text = "\n".join(norm_transcripts) + "\n"
+def get_uroman_tokens(norm_transcripts: list[str], iso=None):
+    outtexts = [
+        uroman_instance.romanize_string(transcript, lcode=iso)
+        for transcript in norm_transcripts
+    ]
 
-    assert os.path.exists(os.path.join(UROMAN_PATH, "uroman.pl")), "uroman not found"
+    uromans = []
+    for ot in outtexts:
+        ot = " ".join(ot.strip())
+        ot = re.sub(r"\s+", " ", ot).strip()
+        normalized = normalize_uroman(ot)
+        uromans.append(normalized)
 
-    assert not subprocess.call(
-        ["perl", "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-    ), (
-        "Please ensure that a valid perl installation exists,"
-        " you can verify by running `perl --version` in your terminal"
-    )
-
-    cmd = ["perl", os.path.join(UROMAN_PATH, "uroman.pl")]
-    if iso in special_isos_uroman:
-        cmd.extend(["-l", iso])
-
-    result = subprocess.run(
-        cmd, input=input_text, text=True, capture_output=True, check=True
-    )
-    output_text = result.stdout
-
-    outtexts = []
-    for line in output_text.splitlines():
-        line = " ".join(line.strip())
-        line = re.sub(r"\s+", " ", line).strip()
-        outtexts.append(line)
-
-    assert len(outtexts) == len(norm_transcripts)
-
-    uromans = [normalize_uroman(ot) for ot in outtexts]
+    assert len(uromans) == len(norm_transcripts)
 
     return uromans
 
 
 def split_text(text: str, split_size: str = "word"):
-
     if split_size == "sentence":
         from nltk.tokenize import PunktSentenceTokenizer
 
@@ -220,7 +206,6 @@ def preprocess_text(
     # it's used extensively here but I found that it produces more accurate results
     # and doesn't affect the runtime
     if star_frequency == "segment":
-
         tokens_starred = []
         [tokens_starred.extend(["<star>", token]) for token in tokens]
 

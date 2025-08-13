@@ -61,8 +61,8 @@ def cli():
         default="edges",
         choices=["segment", "edges"],
         help="The frequency of the <star> token in the text."
-        "Star token increases the accuracy of the alignment but also increases segment fragmentation."
-        "segment adds <star> token after each segment."
+        "Star token increases the accuracy of the alignment but also increases segment"
+        "fragmentation. segment adds <star> token after each segment."
         "edges adds <star> token at the start and end of the text."
         "use --merge_threshold to merge segments that are closer than the threshold.",
     )
@@ -118,7 +118,8 @@ def cli():
         type=str,
         default=None,
         choices=["eager", "sdpa", "flash_attention_2", None],
-        help="Attention implementation for the model. It will chose the fastest implementation by default.",
+        help="Attention implementation for the model. "
+        "It will chose the fastest implementation by default.",
     )
 
     parser.add_argument(

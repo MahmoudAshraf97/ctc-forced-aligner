@@ -1,7 +1,11 @@
 <h1 align="center">Forced Alignment with Hugging Face CTC Models</h1>
+
+[![FreePalestine.Dev](https://freepalestine.dev/header/1)](https://freepalestine.dev)
+
+
 <p align="center">
   <a href="https://github.com/MahmoudAshraf97/ctc-forced-aligner/actions/workflows/test_build.yml">
-    <img src="https://github.com/MahmoudAshraf97/ctc-forced-aligner/actions/workflows/test_build.yml/badge.svg"
+    <img src="https://github.com/MahmoudAshraf97/ctc-forced-aligner/actions/workflows/CI.yml/badge.svg"
          alt="Build Status">
   </a>
   <a href="https://github.com/MahmoudAshraf97/ctc-forced-aligner/stargazers">
@@ -39,8 +43,15 @@ This Python package provides an efficient way to perform forced alignment betwee
 
 ### Installation
 
+#### Latest version from GitHub
 ```bash
 pip install git+https://github.com/MahmoudAshraf97/ctc-forced-aligner.git
+```
+#### Installing locally from source
+```bash
+git clone https://github.com/MahmoudAshraf97/ctc-forced-aligner.git
+cd ctc-forced-aligner
+pip install -e .[dev]
 ```
 
 ### Usage
@@ -137,13 +148,13 @@ tokens_starred, text_starred = preprocess_text(
     language=language,
 )
 
-segments, scores, blank_id = get_alignments(
+segments, scores, blank_token = get_alignments(
     emissions,
     tokens_starred,
     alignment_tokenizer,
 )
 
-spans = get_spans(tokens_starred, segments, alignment_tokenizer.decode(blank_id))
+spans = get_spans(tokens_starred, segments, blank_token)
 
 word_timestamps = postprocess_results(text_starred, spans, stride, scores)
 ```
@@ -221,7 +232,6 @@ The alignment results will be saved to a file (or printed to stdout, depending o
   ]
 }
 ```
-
 </details>
 
 

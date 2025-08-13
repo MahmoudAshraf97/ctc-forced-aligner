@@ -16,3 +16,5 @@ from .text_utils import (
     split_text,
     text_normalize,
 )
+
+__version__ = "0.3.0"

@@ -1,10 +1,12 @@
 import math
+
 from dataclasses import dataclass
 from typing import Optional, Tuple
 
 import numpy as np
 import torch
 import torchaudio
+
 from packaging import version
 from transformers import AutoModelForCTC, AutoTokenizer
 from transformers import __version__ as transformers_version
@@ -116,18 +118,23 @@ def generate_emissions(
     context_length=2,
     batch_size=4,
 ):
-    # batching the input tensor and including a context before and after the input tensor
-
-    batch_size = min(batch_size, 1)
-    context = context_length * SAMPLING_FREQ
-    window = window_length * SAMPLING_FREQ
-    extention = math.ceil(
-        audio_waveform.size(0) / window
-    ) * window - audio_waveform.size(0)
-    padded_waveform = torch.nn.functional.pad(
-        audio_waveform, (context, context + extention)
-    )
-    input_tensor = padded_waveform.unfold(0, window + 2 * context, window)
+    batch_size = max(batch_size, 1)
+    window = int(window_length * SAMPLING_FREQ)
+    if audio_waveform.size(0) < window:
+        extension = 0
+        context = 0
+        input_tensor = audio_waveform.unsqueeze(0)
+    else:
+        # batching the input tensor and including a context
+        # before and after the input tensor
+        context = int(context_length * SAMPLING_FREQ)
+        extension = math.ceil(
+            audio_waveform.size(0) / window
+        ) * window - audio_waveform.size(0)
+        padded_waveform = torch.nn.functional.pad(
+            audio_waveform, (context, context + extension)
+        )
+        input_tensor = padded_waveform.unfold(0, window + 2 * context, window)
 
     # Batched Inference
     emissions_arr = []
@@ -137,13 +144,16 @@ def generate_emissions(
             emissions_ = model(input_batch).logits
             emissions_arr.append(emissions_)
 
-    emissions = torch.cat(emissions_arr, dim=0)[
-        :,
-        time_to_frame(context_length) : -time_to_frame(context_length) + 1,
-    ]  # removing the context
+    emissions = torch.cat(emissions_arr, dim=0)
+    if context > 0:
+        emissions = emissions[
+            :,
+            time_to_frame(context_length) : -time_to_frame(context_length) + 1,
+        ]  # removing the context
     emissions = emissions.flatten(0, 1)
-    if time_to_frame(extention / SAMPLING_FREQ) > 0:
-        emissions = emissions[: -time_to_frame(extention / SAMPLING_FREQ), :]
+
+    if time_to_frame(extension / SAMPLING_FREQ) > 0:
+        emissions = emissions[: -time_to_frame(extension / SAMPLING_FREQ)]
 
     emissions = torch.log_softmax(emissions, dim=-1)
     emissions = torch.cat(
@@ -229,7 +239,7 @@ def get_alignments(
 
     blank_id = dictionary.get("<blank>", tokenizer.pad_token_id)
 
-    if emissions.is_cuda:
+    if not emissions.is_cpu:
         emissions = emissions.cpu()
     targets = np.asarray([token_indices], dtype=np.int64)
 
