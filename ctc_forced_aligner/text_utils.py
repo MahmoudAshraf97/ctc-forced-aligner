@@ -5,14 +5,20 @@ import numpy as np
 
 from uroman import Uroman
 
+from .alignment_utils import Segment
+
 from .norm_config import norm_config
 
 uroman_instance = Uroman()
 
 
 def text_normalize(
-    text, iso_code, lower_case=True, remove_numbers=True, remove_brackets=False
-):
+    text: str,
+    iso_code: str,
+    lower_case: bool = True,
+    remove_numbers: bool = True,
+    remove_brackets: bool = False,
+) -> str:
     """Given a text, normalize it by changing to lower case, removing punctuations,
     removing words that only contain digits and removing extra spaces
 
@@ -141,20 +147,20 @@ special_isos_uroman = [
 ]
 
 
-def normalize_uroman(text):
+def normalize_uroman(text: str):
     text = text.lower()
     text = re.sub("([^a-z' ])", " ", text)
     text = re.sub(" +", " ", text)
     return text.strip()
 
 
-def get_uroman_tokens(norm_transcripts: list[str], iso=None):
+def get_uroman_tokens(norm_transcripts: list[str], iso: str | None = None):
     outtexts = [
         uroman_instance.romanize_string(transcript, lcode=iso)
         for transcript in norm_transcripts
     ]
 
-    uromans = []
+    uromans: list[str] = []
     for ot in outtexts:
         ot = " ".join(ot.strip())
         ot = re.sub(r"\s+", " ", ot).strip()
@@ -167,21 +173,28 @@ def get_uroman_tokens(norm_transcripts: list[str], iso=None):
 
 
 def split_text(text: str, split_size: str = "word"):
+    result: list[str] = []
+
     if split_size == "sentence":
         from nltk.tokenize import PunktSentenceTokenizer
 
         sentence_checker = PunktSentenceTokenizer()
-        sentences = sentence_checker.sentences_from_text(text)
-        return sentences
+        result = sentence_checker.sentences_from_text(text)
 
     elif split_size == "word":
-        return text.split()
+        result = text.split()
     elif split_size == "char":
-        return list(text)
+        result = list(text)
+
+    return result
 
 
 def preprocess_text(
-    text, romanize, language, split_size="word", star_frequency="segment"
+    text: str,
+    romanize: bool,
+    language: str,
+    split_size: str = "word",
+    star_frequency: str = "segment",
 ):
     assert split_size in [
         "sentence",
@@ -202,6 +215,9 @@ def preprocess_text(
     else:
         tokens = [" ".join(list(word)) for word in norm_text]
 
+    tokens_starred: list[str] = []
+    text_starred: list[str] = []
+
     # add <star> token to the tokens and text
     # it's used extensively here but I found that it produces more accurate results
     # and doesn't affect the runtime
@@ -219,15 +235,15 @@ def preprocess_text(
     return tokens_starred, text_starred
 
 
-def merge_segments(segments, threshold=0.00):
+def merge_segments(segments: list[dict[str, float]], threshold: float = 0.00):
     for i in range(len(segments) - 1):
         if segments[i + 1]["start"] - segments[i]["end"] < threshold:
             segments[i + 1]["start"] = segments[i]["end"]
 
 
 def postprocess_results(
-    text_starred: list,
-    spans: list,
+    text_starred: list[str],
+    spans: list[list[Segment]],
     stride: float,
     scores: np.ndarray,
     merge_threshold: float = 0.0,

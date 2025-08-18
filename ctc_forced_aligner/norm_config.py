@@ -216,7 +216,7 @@ shared_punc_list = (
     + punct_pattern
 )
 
-shared_mappping = {
+shared_mapping = {
     lesser_than_symbol: "",
     greater_than_symbol: "",
     nbsp_written_form: "",
@@ -239,7 +239,7 @@ norm_config = {
         "lower_case": True,
         "punc_set": shared_punc_list,
         "del_set": shared_deletion_list,
-        "mapping": shared_mappping,
+        "mapping": shared_mapping,
         "digit_set": shared_digits,
         "unicode_norm": "NFKC",
         "rm_diacritics": False,
