@@ -1,7 +1,6 @@
 import math
 
 from dataclasses import dataclass
-from typing import Optional, Tuple
 
 import numpy as np
 import torch
@@ -48,7 +47,7 @@ def time_to_frame(time):
     return int(time * frames_per_sec)
 
 
-def get_spans(tokens, segments, blank):
+def get_spans(tokens: list[str], segments, blank):
     ltr_idx = 0
     tokens_idx = 0
     intervals = []
@@ -74,7 +73,7 @@ def get_spans(tokens, segments, blank):
                 tokens_idx += 1
         else:
             ltr_idx += 1
-    spans = []
+    spans: list[Segment] = []
     for idx, (start, end) in enumerate(intervals):
         span = segments[start : end + 1]
         if start > 0:
@@ -114,9 +113,9 @@ def load_audio(audio_file: str, dtype: torch.dtype, device: str):
 def generate_emissions(
     model,
     audio_waveform: torch.Tensor,
-    window_length=30,
-    context_length=2,
-    batch_size=4,
+    window_length: int = 30,
+    context_length: int = 2,
+    batch_size: int = 4,
 ):
     batch_size = max(batch_size, 1)
     window = int(window_length * SAMPLING_FREQ)
@@ -167,10 +166,10 @@ def generate_emissions(
 def forced_align(
     log_probs: np.ndarray,
     targets: np.ndarray,
-    input_lengths: Optional[np.ndarray] = None,
-    target_lengths: Optional[np.ndarray] = None,
+    input_lengths: np.ndarray | None = None,
+    target_lengths: np.ndarray | None = None,
     blank: int = 0,
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     r"""Align a CTC label sequence to an emission.
     Args:
         log_probs (NDArray): log probability of CTC emission output.
@@ -185,7 +184,7 @@ def forced_align(
         blank_id (int, optional): The index of blank symbol in CTC emission. (Default: 0)
 
     Returns:
-        Tuple(NDArray, NDArray):
+        tuple(NDArray, NDArray):
             NDArray: Label for each time step in the alignment path computed using forced alignment.
 
             NDArray: Log probability scores of the labels for each time step.
@@ -223,7 +222,7 @@ def forced_align(
 
 def get_alignments(
     emissions: torch.Tensor,
-    tokens: list,
+    tokens: list[str],
     tokenizer,
 ):
     assert len(tokens) > 0, "Empty transcript"
@@ -258,7 +257,7 @@ def get_alignments(
 def load_alignment_model(
     device: str,
     model_path: str = "MahmoudAshraf/mms-300m-1130-forced-aligner",
-    attn_implementation: str = None,
+    attn_implementation: str | None = None,
     dtype: torch.dtype = torch.float32,
 ):
     if attn_implementation is None:
