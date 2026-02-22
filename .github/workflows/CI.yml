@@ -128,7 +128,7 @@ jobs:
       - name: Run tests
         shell: bash
         run: |
-          pytest -v -n auto tests/
+          pytest -v tests/
 
   publish-python-wheels-on-pypi:
     needs: [test-python-wheels]
