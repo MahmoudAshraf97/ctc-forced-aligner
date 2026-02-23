@@ -138,6 +138,8 @@ def load_audio(audio_file: str, dtype: torch.dtype, device: str):
         out = run(cmd, capture_output=True, check=True).stdout
     except CalledProcessError as e:
         raise RuntimeError(f"Failed to load audio: {e.stderr.decode()}") from e
+    except FileNotFoundError:
+        raise ImportError("ffmpeg not found. Please ensure ffmpeg is installed and in PATH.")
 
     return (
         torch.frombuffer(out, dtype=torch.int16).flatten().to(dtype).to(device)
