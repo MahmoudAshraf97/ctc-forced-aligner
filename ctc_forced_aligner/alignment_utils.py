@@ -81,9 +81,7 @@ def get_spans(tokens, segments, blank):
             prev_seg = segments[start - 1]
             if prev_seg.label == blank:
                 pad_start = (
-                    prev_seg.start
-                    if (idx == 0)
-                    else int((prev_seg.start + prev_seg.end) / 2)
+                    prev_seg.start if (idx == 0) else int((prev_seg.start + prev_seg.end) / 2)
                 )
                 span = [Segment(blank, pad_start, span[0].start)] + span
         if end + 1 < len(segments):
@@ -141,10 +139,7 @@ def load_audio(audio_file: str, dtype: torch.dtype, device: str):
     except FileNotFoundError:
         raise ImportError("ffmpeg not found. Please ensure ffmpeg is installed and in PATH.")
 
-    return (
-        torch.frombuffer(out, dtype=torch.int16).flatten().to(dtype).to(device)
-        / 32768.0
-    )
+    return torch.frombuffer(out, dtype=torch.int16).flatten().to(dtype).to(device) / 32768.0
 
 
 def generate_emissions(
@@ -164,12 +159,8 @@ def generate_emissions(
         # batching the input tensor and including a context
         # before and after the input tensor
         context = int(context_length * SAMPLING_FREQ)
-        extension = math.ceil(
-            audio_waveform.size(0) / window
-        ) * window - audio_waveform.size(0)
-        padded_waveform = torch.nn.functional.pad(
-            audio_waveform, (context, context + extension)
-        )
+        extension = math.ceil(audio_waveform.size(0) / window) * window - audio_waveform.size(0)
+        padded_waveform = torch.nn.functional.pad(audio_waveform, (context, context + extension))
         input_tensor = padded_waveform.unfold(0, window + 2 * context, window)
 
     # Batched Inference
@@ -240,9 +231,7 @@ def forced_align(
         The current version only supports ``batch_size==1``.
     """
     if blank in targets:
-        raise ValueError(
-            f"targets Tensor shouldn't contain blank index. Found {targets}."
-        )
+        raise ValueError(f"targets Tensor shouldn't contain blank index. Found {targets}.")
     if blank >= log_probs.shape[-1] or blank < 0:
         raise ValueError("blank must be within [0, log_probs.shape[-1])")
     if np.max(targets) >= log_probs.shape[-1] and np.min(targets) >= 0:
@@ -269,9 +258,7 @@ def get_alignments(
     dictionary["<star>"] = len(dictionary)
 
     # Force Alignment
-    token_indices = [
-        dictionary[c] for c in " ".join(tokens).split(" ") if c in dictionary
-    ]
+    token_indices = [dictionary[c] for c in " ".join(tokens).split(" ") if c in dictionary]
 
     blank_id = dictionary.get("<blank>", tokenizer.pad_token_id)
 
