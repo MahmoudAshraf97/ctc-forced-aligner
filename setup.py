@@ -1,6 +1,7 @@
+import sys
+
 from pybind11.setup_helpers import Pybind11Extension, build_ext
 from setuptools import setup
-import sys
 
 ext_modules = [
     Pybind11Extension(

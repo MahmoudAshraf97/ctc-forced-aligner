@@ -1,11 +1,11 @@
 import math
 
 from dataclasses import dataclass
+from subprocess import CalledProcessError, run
 from typing import Optional, Tuple
 
 import numpy as np
 import torch
-import torchaudio
 
 from packaging import version
 from transformers import AutoModelForCTC, AutoTokenizer
@@ -100,15 +100,49 @@ def get_spans(tokens, segments, blank):
 
 
 def load_audio(audio_file: str, dtype: torch.dtype, device: str):
-    waveform, audio_sf = torchaudio.load(audio_file)  # waveform: channels X T
-    waveform = torch.mean(waveform, dim=0)
+    """
+    Open an audio file and read as mono waveform, resampling as necessary
 
-    if audio_sf != SAMPLING_FREQ:
-        waveform = torchaudio.functional.resample(
-            waveform, orig_freq=audio_sf, new_freq=SAMPLING_FREQ
-        )
-    waveform = waveform.to(dtype).to(device)
-    return waveform
+    Parameters
+    ----------
+    audio_file: str
+        The audio file to open
+
+    dtype: torch.dtype
+        The desired data type of the returned tensor
+
+    device: str
+        The device to place the returned tensor on
+
+    Returns
+    -------
+    A PyTorch tensor containing the audio waveform, in requested dtype.
+    """
+
+    # This launches a subprocess to decode audio while down-mixing
+    # and resampling as necessary.  Requires the ffmpeg CLI in PATH.
+    # fmt: off
+    cmd = [
+        "ffmpeg",
+        "-nostdin",
+        "-threads", "0",
+        "-i", audio_file,
+        "-f", "s16le",
+        "-ac", "1",
+        "-acodec", "pcm_s16le",
+        "-ar", str(SAMPLING_FREQ),
+        "-"
+    ]
+    # fmt: on
+    try:
+        out = run(cmd, capture_output=True, check=True).stdout
+    except CalledProcessError as e:
+        raise RuntimeError(f"Failed to load audio: {e.stderr.decode()}") from e
+
+    return (
+        torch.frombuffer(out, dtype=torch.int16).flatten().to(dtype).to(device)
+        / 32768.0
+    )
 
 
 def generate_emissions(
