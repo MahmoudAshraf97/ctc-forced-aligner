@@ -16,7 +16,7 @@ version = {attr = "ctc_forced_aligner.__version__"}
 dependencies = {file = ["requirements.txt"]}
 
 [project.optional-dependencies]
-dev = ["black==23.*", "flake8==7.*", "flake8-pyproject==1.*", "isort==5.*", "pytest==7.*", "torchaudio"]
+dev = ["ruff", "pre-commit", "pytest==7.*", "torchaudio"]
 
 [project.urls]
 repository = "https://github.com/MahmoudAshraf97/ctc-forced-aligner"
@@ -29,10 +29,16 @@ ctc-forced-aligner = "ctc_forced_aligner.align:cli"
     "punctuations.lst",
 ]
 
-[tool.flake8]
-max-line-length = 100
-ignore = ["E203", "W503"]
+[tool.ruff]
+line-length = 100
 
-[tool.isort]
-profile = "black"
-lines_between_types = 1
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = ["E203"]
+
+[tool.ruff.lint.per-file-ignores]
+"ctc_forced_aligner/__init__.py" = ["F401"]
+"tests/test_alignment.py" = ["E741"]
+
+[tool.ruff.lint.isort]
+lines-between-types = 1

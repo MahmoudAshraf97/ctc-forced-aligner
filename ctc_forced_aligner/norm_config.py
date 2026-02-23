@@ -147,11 +147,7 @@ all_punct_quotes = (
     + left_single_quotation_mark
 )
 mapping_quotes = (
-    "["
-    + high_single_quotes
-    + right_single_quotation_mark
-    + left_single_quotation_mark
-    + "]"
+    "[" + high_single_quotes + right_single_quotation_mark + left_single_quotation_mark + "]"
 )
 
 
@@ -171,9 +167,7 @@ roman_numeral = r"\u2170-\u2179"
 nominal_digit_shapes = r"\u206f"
 
 # Load punctuations from MMS-lab data
-with open(
-    f"{os.path.dirname(__file__)}/punctuations.lst", "r", encoding="utf-8-sig"
-) as punc_f:
+with open(f"{os.path.dirname(__file__)}/punctuations.lst", "r", encoding="utf-8-sig") as punc_f:
     punc_list = punc_f.readlines()
 
 punct_pattern = r""

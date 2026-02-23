@@ -10,9 +10,7 @@ from .norm_config import norm_config
 uroman_instance = Uroman()
 
 
-def text_normalize(
-    text, iso_code, lower_case=True, remove_numbers=True, remove_brackets=False
-):
+def text_normalize(text, iso_code, lower_case=True, remove_numbers=True, remove_brackets=False):
     """Given a text, normalize it by changing to lower case, removing punctuations,
     removing words that only contain digits and removing extra spaces
 
@@ -150,8 +148,7 @@ def normalize_uroman(text):
 
 def get_uroman_tokens(norm_transcripts: list[str], iso=None):
     outtexts = [
-        uroman_instance.romanize_string(transcript, lcode=iso)
-        for transcript in norm_transcripts
+        uroman_instance.romanize_string(transcript, lcode=iso) for transcript in norm_transcripts
     ]
 
     uromans = []
@@ -180,9 +177,7 @@ def split_text(text: str, split_size: str = "word"):
         return list(text)
 
 
-def preprocess_text(
-    text, romanize, language, split_size="word", star_frequency="segment"
-):
+def preprocess_text(text, romanize, language, split_size="word", star_frequency="segment"):
     assert split_size in [
         "sentence",
         "word",

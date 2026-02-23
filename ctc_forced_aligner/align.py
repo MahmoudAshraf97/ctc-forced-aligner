@@ -24,9 +24,7 @@ def cli():
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--audio_path", help="path of the audio file", required=True)
-    parser.add_argument(
-        "--text_path", help="path of the text to be aligned", required=True
-    )
+    parser.add_argument("--text_path", help="path of the text to be aligned", required=True)
 
     parser.add_argument(
         "--language",
@@ -157,9 +155,7 @@ def cli():
 
     spans = get_spans(tokens_starred, segments, blank_token)
 
-    results = postprocess_results(
-        text_starred, spans, stride, scores, args.merge_threshold
-    )
+    results = postprocess_results(text_starred, spans, stride, scores, args.merge_threshold)
 
     # write the results to a file
     with open(f"{os.path.splitext(args.audio_path)[0]}.txt", "w") as f:

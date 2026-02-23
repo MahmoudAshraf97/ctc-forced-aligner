@@ -21,26 +21,7 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Setup UV
-        uses: astral-sh/setup-uv@v5
-        with:
-          version: "latest"
-
-      - name: Install dependencies
-        run: |
-          uv pip install --system black==24.* flake8==7.* flake8-pyproject==1.* isort==5.*
-
-      - name: Check code format with Black
-        run: |
-          black --check ctc_forced_aligner/*.py
-
-      - name: Check imports order with isort
-        run: |
-          isort --check-only ctc_forced_aligner/*.py
-
-      - name: Check code style with Flake8
-        run: |
-          flake8 ctc_forced_aligner/*.py
+      - uses: pre-commit/action@v3.0.1
 
   build-python-wheels:
     needs: [check-python-style]
