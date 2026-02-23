@@ -42,6 +42,7 @@ This Python package provides an efficient way to perform forced alignment betwee
 
 
 ### Installation
+`FFMPEG` is needed as prerequisite to use
 
 #### Latest version from GitHub
 ```bash
