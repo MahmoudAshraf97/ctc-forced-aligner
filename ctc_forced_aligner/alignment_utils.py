@@ -270,7 +270,7 @@ def get_alignments(
         raise ValueError("No valid tokens found in the dictionary for the given transcript.")
 
     blank_id = dictionary.get("<blank>", tokenizer.pad_token_id)
-    if blank_id >= emissions.size(-1) or blank_id < 0:
+    if blank_id >= emission_vocab_size or blank_id < 0:
         raise ValueError(
             f"blank token index {blank_id} is outside the emission vocabulary of size {emissions.size(-1)}"
         )
