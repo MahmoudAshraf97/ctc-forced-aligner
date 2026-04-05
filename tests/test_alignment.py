@@ -3,6 +3,7 @@ import pytest
 import torch
 import torchaudio.functional as F
 
+from ctc_forced_aligner import alignment_utils
 from ctc_forced_aligner.alignment_utils import forced_align
 
 
@@ -26,3 +27,34 @@ def test_alignment(logprobs_size, vocab_size, targets_size):
 
     num_mismatches = np.sum(ctc_alignment[0] != torch_alignment[0].numpy())
     assert num_mismatches <= 1
+
+
+def test_get_alignments_uses_emission_vocab_size_for_star(monkeypatch):
+    class DummyTokenizer:
+        pad_token_id = 1
+
+        def get_vocab(self):
+            return {
+                "<blank>": 0,
+                "<pad>": 1,
+                "a": 2,
+                "b": 3,
+                "|": 4,
+            }
+
+    captured = {}
+
+    def fake_forced_align(log_probs, targets, blank=0, **kwargs):
+        captured["log_probs_shape"] = log_probs.shape
+        captured["targets"] = targets.copy()
+        captured["blank"] = blank
+        return targets.copy(), np.zeros((targets.shape[-1],), dtype=np.float32)
+
+    monkeypatch.setattr(alignment_utils, "forced_align", fake_forced_align)
+
+    emissions = torch.zeros((8, 5), dtype=torch.float32)
+    alignment_utils.get_alignments(emissions, ["<star>", "a"], DummyTokenizer())
+
+    assert captured["targets"].tolist() == [[4, 2]]
+    assert captured["log_probs_shape"][-1] == 5
+    assert captured["blank"] == 0

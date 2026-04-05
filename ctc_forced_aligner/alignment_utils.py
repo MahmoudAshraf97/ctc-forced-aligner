@@ -143,11 +143,11 @@ def load_audio(audio_file: str, dtype: torch.dtype, device: str):
 
 
 def generate_emissions(
-    model,
-    audio_waveform: torch.Tensor,
-    window_length=30,
-    context_length=2,
-    batch_size=4,
+        model,
+        audio_waveform: torch.Tensor,
+        window_length=30,
+        context_length=2,
+        batch_size=4,
 ):
     batch_size = max(batch_size, 1)
     window = int(window_length * SAMPLING_FREQ)
@@ -192,11 +192,11 @@ def generate_emissions(
 
 
 def forced_align(
-    log_probs: np.ndarray,
-    targets: np.ndarray,
-    input_lengths: Optional[np.ndarray] = None,
-    target_lengths: Optional[np.ndarray] = None,
-    blank: int = 0,
+        log_probs: np.ndarray,
+        targets: np.ndarray,
+        input_lengths: Optional[np.ndarray] = None,
+        target_lengths: Optional[np.ndarray] = None,
+        blank: int = 0,
 ) -> Tuple[np.ndarray, np.ndarray]:
     r"""Align a CTC label sequence to an emission.
     Args:
@@ -234,7 +234,7 @@ def forced_align(
         raise ValueError(f"targets Tensor shouldn't contain blank index. Found {targets}.")
     if blank >= log_probs.shape[-1] or blank < 0:
         raise ValueError("blank must be within [0, log_probs.shape[-1])")
-    if np.max(targets) >= log_probs.shape[-1] and np.min(targets) >= 0:
+    if np.max(targets) >= log_probs.shape[-1] or np.min(targets) < 0:
         raise ValueError("targets values must be within [0, log_probs.shape[-1])")
     assert log_probs.dtype == np.float32, "log_probs must be float32"
 
@@ -246,21 +246,32 @@ def forced_align(
     return paths, scores
 
 
+def _build_alignment_dictionary(tokenizer, emission_vocab_size: int) -> dict[str, int]:
+    dictionary = {k.lower(): v for k, v in tokenizer.get_vocab().items()}
+    dictionary = {
+        token: idx for token, idx in dictionary.items() if 0 <= idx < emission_vocab_size
+    }
+    dictionary["<star>"] = emission_vocab_size
+    return dictionary
+
+
 def get_alignments(
-    emissions: torch.Tensor,
-    tokens: list,
-    tokenizer,
+        emissions: torch.Tensor,
+        tokens: list,
+        tokenizer,
 ):
     assert len(tokens) > 0, "Empty transcript"
 
-    dictionary = tokenizer.get_vocab()
-    dictionary = {k.lower(): v for k, v in dictionary.items()}
-    dictionary["<star>"] = len(dictionary)
+    emission_vocab_size = emissions.size(-1) - 1
+    dictionary = _build_alignment_dictionary(tokenizer, emission_vocab_size)
 
-    # Force Alignment
     token_indices = [dictionary[c] for c in " ".join(tokens).split(" ") if c in dictionary]
 
     blank_id = dictionary.get("<blank>", tokenizer.pad_token_id)
+    if blank_id >= emissions.size(-1) or blank_id < 0:
+        raise ValueError(
+            f"blank token index {blank_id} is outside the emission vocabulary of size {emissions.size(-1)}"
+        )
 
     if not emissions.is_cpu:
         emissions = emissions.cpu()
@@ -279,18 +290,18 @@ def get_alignments(
 
 
 def load_alignment_model(
-    device: str,
-    model_path: str = "MahmoudAshraf/mms-300m-1130-forced-aligner",
-    attn_implementation: str = None,
-    dtype: torch.dtype = torch.float32,
+        device: str,
+        model_path: str = "MahmoudAshraf/mms-300m-1130-forced-aligner",
+        attn_implementation: str = None,
+        dtype: torch.dtype = torch.float32,
 ):
     if attn_implementation is None:
         if version.parse(transformers_version) < version.parse("4.41.0"):
             attn_implementation = "eager"
         elif (
-            is_flash_attn_2_available()
-            and device == "cuda"
-            and dtype in [torch.float16, torch.bfloat16]
+                is_flash_attn_2_available()
+                and device == "cuda"
+                and dtype in [torch.float16, torch.bfloat16]
         ):
             attn_implementation = "flash_attention_2"
         else:
