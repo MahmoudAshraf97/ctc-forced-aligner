@@ -247,9 +247,9 @@ def forced_align(
 
 
 def _build_alignment_dictionary(tokenizer, emission_vocab_size: int) -> dict[str, int]:
-    dictionary = {k.lower(): v for k, v in tokenizer.get_vocab().items()}
     dictionary = {
-        token: idx for token, idx in dictionary.items() if 0 <= idx < emission_vocab_size
+        k.lower(): v for k, v in tokenizer.get_vocab().items()
+        if 0 <= v < emission_vocab_size
     }
     dictionary["<star>"] = emission_vocab_size
     return dictionary
