@@ -266,6 +266,8 @@ def get_alignments(
     dictionary = _build_alignment_dictionary(tokenizer, emission_vocab_size)
 
     token_indices = [dictionary[c] for c in " ".join(tokens).split(" ") if c in dictionary]
+    if not token_indices:
+        raise ValueError("No valid tokens found in the dictionary for the given transcript.")
 
     blank_id = dictionary.get("<blank>", tokenizer.pad_token_id)
     if blank_id >= emissions.size(-1) or blank_id < 0:
