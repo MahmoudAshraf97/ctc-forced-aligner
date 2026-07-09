@@ -234,7 +234,7 @@ def postprocess_results(
             continue
         span = spans[i]
         seg_start_idx = span[0].start
-        seg_end_idx = span[-1].end
+        seg_end_idx = span[-1].end + 1
 
         audio_start_sec = seg_start_idx * (stride) / 1000
         audio_end_sec = seg_end_idx * (stride) / 1000

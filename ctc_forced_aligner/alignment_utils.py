@@ -39,12 +39,6 @@ def merge_repeats(path, idx_to_token_map):
     return segments
 
 
-def time_to_frame(time):
-    stride_msec = 20
-    frames_per_sec = 1000 / stride_msec
-    return int(time * frames_per_sec)
-
-
 def get_spans(tokens, segments, blank):
     ltr_idx = 0
     tokens_idx = 0
@@ -147,7 +141,15 @@ def generate_emissions(
     batch_size=4,
 ):
     batch_size = max(batch_size, 1)
+    ratio = model.config.inputs_to_logits_ratio  # 320 for wav2vec2/MMS
     window = int(window_length * SAMPLING_FREQ)
+    context = int(context_length * SAMPLING_FREQ)
+    assert window % ratio == 0 and context % ratio == 0, (
+        f"window/context must be multiples of the model stride (ratio={ratio / SAMPLING_FREQ}s)"
+    )
+    context_frames = context // ratio
+    window_frames = window // ratio
+
     if audio_waveform.size(0) < window:
         extension = 0
         context = 0
@@ -155,7 +157,6 @@ def generate_emissions(
     else:
         # batching the input tensor and including a context
         # before and after the input tensor
-        context = int(context_length * SAMPLING_FREQ)
         extension = math.ceil(audio_waveform.size(0) / window) * window - audio_waveform.size(0)
         padded_waveform = torch.nn.functional.pad(audio_waveform, (context, context + extension))
         input_tensor = padded_waveform.unfold(0, window + 2 * context, window)
@@ -170,22 +171,19 @@ def generate_emissions(
 
     emissions = torch.cat(emissions_arr, dim=0)
     if context > 0:
-        emissions = emissions[
-            :,
-            time_to_frame(context_length) : -time_to_frame(context_length) + 1,
-        ]  # removing the context
+        emissions = emissions[:, context_frames : context_frames + window_frames]
     emissions = emissions.flatten(0, 1)
 
-    if time_to_frame(extension / SAMPLING_FREQ) > 0:
-        emissions = emissions[: -time_to_frame(extension / SAMPLING_FREQ)]
+    if extension > 0:
+        emissions = emissions[: -(extension // ratio)]
 
     emissions = torch.log_softmax(emissions, dim=-1)
     emissions = torch.cat(
         [emissions, torch.zeros(emissions.size(0), 1).to(emissions.device)], dim=1
     )  # adding a star token dimension
-    stride = float(audio_waveform.size(0) * 1000 / emissions.size(0) / SAMPLING_FREQ)
+    stride = ratio * 1000 / SAMPLING_FREQ
 
-    return emissions, math.ceil(stride)
+    return emissions, stride
 
 
 def forced_align(
