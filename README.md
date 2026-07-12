@@ -131,7 +131,8 @@ alignment_model, alignment_tokenizer = load_alignment_model(
     dtype=torch.float16 if device == "cuda" else torch.float32,
 )
 
-audio_waveform = load_audio(audio_path, alignment_model.dtype, alignment_model.device)
+# Keep the complete waveform and emissions on CPU; only each inference batch uses CUDA.
+audio_waveform = load_audio(audio_path, alignment_model.dtype, "cpu")
 
 
 with open(text_path, "r") as f:
@@ -247,4 +248,3 @@ This project is licensed under the BSD License, note that the default model has 
 ### Acknowledgements
 
 This project is based on the work of FAIR MMS team.
-
