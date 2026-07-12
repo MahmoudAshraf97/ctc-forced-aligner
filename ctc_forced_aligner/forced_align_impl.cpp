@@ -19,9 +19,8 @@ void forced_align_impl(
   const auto S = 2 * L + 1;
   std::vector<scalar_t> alphas(2 * S, kNegInfinity);
 
-  // Replace backPtr tensor with two std::vector<bool>
-  // allocate memory based on the expected needed size which is approximately
-  // S * (T-L), we will use a safety margin of (T-L) to avoid reallocation
+  // Replace backPtr tensor with two std::vector<bool>. Allocate the expected
+  // common-case size, but allow the vectors to grow for tighter trellises.
   std::vector<unsigned long long> backPtr_offset(T - 1);
   std::vector<unsigned long long> backPtr_seek(T - 1);
 
@@ -70,6 +69,11 @@ void forced_align_impl(
     std::fill(alphas.begin() + curIdxOffset * S, alphas.begin() + (curIdxOffset + 1) * S, kNegInfinity);
     backPtr_seek[t - 1] = seek;
     backPtr_offset[t - 1] = start;
+    const auto requiredBackPtrSize = seek + end - start;
+    while (backPtrBit0.size() < requiredBackPtrSize) {
+      backPtrBit0.push_back(false);
+      backPtrBit1.push_back(false);
+    }
     if (start == 0) {
       alphas[curIdxOffset * S] = alphas[prevIdxOffset * S] + logProbs_data(batchIndex, t, blank);
       startloop += 1;
@@ -111,10 +115,11 @@ void forced_align_impl(
   for (auto t = T - 1; t > -1; t--) {
     auto lbl_idx = ltrIdx % 2 == 0 ? blank : targets_data(batchIndex, ltrIdx / 2);
     paths_data(batchIndex, t) = lbl_idx;
+    if (t == 0) {
+      break;
+    }
     // Calculate backPtr value from bits
-    auto t_minus_one = t - 1 >= 0 ? t - 1 : 0;
-    auto backPtr_idx = backPtr_seek[t_minus_one] +
-                       ltrIdx - backPtr_offset[t_minus_one];
+    auto backPtr_idx = backPtr_seek[t - 1] + ltrIdx - backPtr_offset[t - 1];
     ltrIdx -= (backPtrBit1[backPtr_idx] << 1) | backPtrBit0[backPtr_idx];
   }
 }
