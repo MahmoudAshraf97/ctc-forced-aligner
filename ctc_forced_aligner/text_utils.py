@@ -238,7 +238,7 @@ def postprocess_results(
 
         audio_start_sec = seg_start_idx * (stride) / 1000
         audio_end_sec = seg_end_idx * (stride) / 1000
-        score = scores[seg_start_idx:seg_end_idx].sum()
+        score = scores[seg_start_idx:seg_end_idx].mean()
         sample = {
             "start": audio_start_sec,
             "end": audio_end_sec,
