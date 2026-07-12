@@ -70,9 +70,9 @@ void forced_align_impl(
     backPtr_seek[t - 1] = seek;
     backPtr_offset[t - 1] = start;
     const auto requiredBackPtrSize = seek + end - start;
-    while (backPtrBit0.size() < requiredBackPtrSize) {
-      backPtrBit0.push_back(false);
-      backPtrBit1.push_back(false);
+    if (backPtrBit0.size() < requiredBackPtrSize) {
+      backPtrBit0.resize(requiredBackPtrSize, false);
+      backPtrBit1.resize(requiredBackPtrSize, false);
     }
     if (start == 0) {
       alphas[curIdxOffset * S] = alphas[prevIdxOffset * S] + logProbs_data(batchIndex, t, blank);
