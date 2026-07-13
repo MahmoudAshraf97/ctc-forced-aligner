@@ -17,7 +17,8 @@ def text_normalize(text, iso_code, lower_case=True, remove_numbers=True, remove_
     Args:
         text : The string to be normalized
         iso_code : ISO 639-3 code of the language
-        remove_numbers : Boolean flag to specify if words containing only digits should be removed
+        remove_numbers : Whether words containing only digits should be removed
+        remove_brackets : Whether brackets should be removed
 
     Returns:
         normalized_text : the string after all normalization
