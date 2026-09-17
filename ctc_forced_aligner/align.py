@@ -134,7 +134,8 @@ def cli():
         TORCH_DTYPES[args.compute_dtype],
     )
 
-    audio_waveform = load_audio(args.audio_path, model.dtype, model.device)
+    # Keep the complete waveform and emissions on CPU; only each inference batch uses CUDA.
+    audio_waveform = load_audio(args.audio_path, model.dtype, "cpu")
     emissions, stride = generate_emissions(
         model, audio_waveform, args.window_size, args.context_size, args.batch_size
     )

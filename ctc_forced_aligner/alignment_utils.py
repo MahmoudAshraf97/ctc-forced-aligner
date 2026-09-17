@@ -140,6 +140,12 @@ def generate_emissions(
     context_length=2,
     batch_size=4,
 ):
+    """Generate CTC emissions while retaining only one inference batch at a time.
+
+    The returned tensor remains on ``audio_waveform.device`` for compatibility. Keeping
+    the waveform on CPU therefore bounds accelerator memory to the model, the current
+    inference batch, and its logits.
+    """
     batch_size = max(batch_size, 1)
     ratio = model.config.inputs_to_logits_ratio  # 320 for wav2vec2/MMS
     window = int(window_length * SAMPLING_FREQ)
@@ -152,35 +158,89 @@ def generate_emissions(
 
     if audio_waveform.size(0) < window:
         extension = 0
-        context = 0
-        input_tensor = audio_waveform.unsqueeze(0)
+        total_windows = 1
+        total_frames = None
     else:
-        # batching the input tensor and including a context
-        # before and after the input tensor
-        extension = math.ceil(audio_waveform.size(0) / window) * window - audio_waveform.size(0)
-        padded_waveform = torch.nn.functional.pad(audio_waveform, (context, context + extension))
-        input_tensor = padded_waveform.unfold(0, window + 2 * context, window)
+        total_windows = math.ceil(audio_waveform.size(0) / window)
+        extension = total_windows * window - audio_waveform.size(0)
+        total_frames = total_windows * window_frames - extension // ratio
 
-    # Batched Inference
-    emissions_arr = []
+    try:
+        model_parameter = next(model.parameters())
+    except StopIteration as error:
+        raise ValueError("The alignment model must have at least one parameter") from error
+    model_device = model_parameter.device
+    model_dtype = model_parameter.dtype
+    output_device = audio_waveform.device
+    effective_batch_size = batch_size
+    emissions = None
+    write_offset = 0
+    first_window = 0
+
     with torch.inference_mode():
-        for i in range(0, input_tensor.size(0), batch_size):
-            input_batch = input_tensor[i : i + batch_size]
-            emissions_ = model(input_batch).logits
-            emissions_arr.append(emissions_)
+        while first_window < total_windows:
+            window_count = min(effective_batch_size, total_windows - first_window)
+            input_batch = None
+            logits = None
+            batch_emissions = None
+            try:
+                if audio_waveform.size(0) < window:
+                    input_batch = audio_waveform.unsqueeze(0)
+                else:
+                    batch_start = first_window * window - context
+                    batch_end = (first_window + window_count) * window + context
+                    source_start = max(0, batch_start)
+                    source_end = min(audio_waveform.size(0), batch_end)
+                    input_batch = torch.nn.functional.pad(
+                        audio_waveform[source_start:source_end],
+                        (source_start - batch_start, batch_end - source_end),
+                    )
+                    input_batch = input_batch.unfold(0, window + 2 * context, window)
 
-    emissions = torch.cat(emissions_arr, dim=0)
-    if context > 0:
-        emissions = emissions[:, context_frames : context_frames + window_frames]
-    emissions = emissions.flatten(0, 1)
+                input_batch = input_batch.to(device=model_device, dtype=model_dtype)
+                logits = model(input_batch).logits
 
-    if extension > 0:
-        emissions = emissions[: -(extension // ratio)]
+                if audio_waveform.size(0) >= window:
+                    required_frames = context_frames + window_frames
+                    if logits.size(1) < required_frames:
+                        raise RuntimeError(
+                            "Model returned too few frames for the configured window"
+                        )
+                    logits = logits[:, context_frames:required_frames]
 
-    emissions = torch.log_softmax(emissions, dim=-1)
-    emissions = torch.cat(
-        [emissions, torch.zeros(emissions.size(0), 1).to(emissions.device)], dim=1
-    )  # adding a star token dimension
+                batch_emissions = torch.log_softmax(logits.flatten(0, 1), dim=-1)
+            except torch.cuda.OutOfMemoryError:
+                if window_count == 1:
+                    raise
+                effective_batch_size = max(1, window_count // 2)
+                del input_batch, logits, batch_emissions
+                if model_device.type == "cuda":
+                    torch.cuda.empty_cache()
+                continue
+
+            if total_frames is None:
+                total_frames = batch_emissions.size(0)
+            if emissions is None:
+                emissions = torch.empty(
+                    (total_frames, batch_emissions.size(-1) + 1),
+                    dtype=torch.float32,
+                    device=output_device,
+                )
+                emissions[:, -1] = 0
+
+            frame_count = min(batch_emissions.size(0), total_frames - write_offset)
+            emissions[write_offset : write_offset + frame_count, :-1].copy_(
+                batch_emissions[:frame_count].to(output_device, dtype=torch.float32)
+            )
+            write_offset += frame_count
+            first_window += window_count
+            del input_batch, logits, batch_emissions
+
+    if emissions is None or write_offset != total_frames:
+        raise RuntimeError(
+            f"Emission assembly wrote {write_offset} frames; expected {total_frames}"
+        )
+
     stride = ratio * 1000 / SAMPLING_FREQ
 
     return emissions, stride
