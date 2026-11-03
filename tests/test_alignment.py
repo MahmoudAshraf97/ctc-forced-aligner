@@ -3,7 +3,7 @@ import pytest
 import torch
 import torchaudio.functional as F
 
-from ctc_forced_aligner.alignment_utils import forced_align
+from ctc_forced_aligner.alignment_utils import forced_align, get_alignments
 
 
 @pytest.mark.parametrize(
@@ -26,3 +26,39 @@ def test_alignment(logprobs_size, vocab_size, targets_size):
 
     num_mismatches = np.sum(ctc_alignment[0] != torch_alignment[0].numpy())
     assert num_mismatches <= 1
+
+
+class _Tokenizer:
+    vocab_size = 4
+    pad_token_id = 0
+
+    def get_vocab(self):
+        return {"<blank>": 0, "a": 1, "b": 2, "c": 3}
+
+
+@pytest.mark.parametrize(
+    "tokens, expected_path",
+    [
+        (["a"], [1]),
+        (["a a b"], [1, 0, 1, 2]),
+    ],
+    ids=["single_frame", "exact_fit_with_repeat"],
+)
+def test_frames_that_exactly_fit_the_targets(tokens, expected_path):
+    emissions = torch.full((len(expected_path), 5), -1.6)
+
+    segments, scores, blank = get_alignments(emissions, tokens, _Tokenizer())
+
+    path = [
+        token
+        for segment in segments
+        for token in [segment.label] * (segment.end - segment.start + 1)
+    ]
+    assert path == [{0: blank, 1: "a", 2: "b", 3: "c"}[index] for index in expected_path]
+    assert scores.shape == (len(expected_path),)
+
+
+def test_too_few_frames_are_still_rejected():
+    with pytest.raises(RuntimeError, match="too long for CTC"):
+        get_alignments(torch.full((3, 5), -1.6), ["a a b"], _Tokenizer())
+
