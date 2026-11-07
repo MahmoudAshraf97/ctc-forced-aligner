@@ -61,4 +61,3 @@ def test_frames_that_exactly_fit_the_targets(tokens, expected_path):
 def test_too_few_frames_are_still_rejected():
     with pytest.raises(RuntimeError, match="too long for CTC"):
         get_alignments(torch.full((3, 5), -1.6), ["a a b"], _Tokenizer())
-
