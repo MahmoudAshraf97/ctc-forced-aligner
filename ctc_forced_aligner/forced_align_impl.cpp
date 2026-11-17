@@ -131,16 +131,19 @@ std::tuple<py::array_t<int64_t>, py::array_t<float>> compute(
   const auto B = logProbs.shape(0);
   const auto T = logProbs.shape(1);
   auto paths = py::array_t<int64_t>({B, T});
-
-  forced_align_impl<float, int64_t>(logProbs, targets, blank, paths);
-
-  auto aligned_paths = paths.unchecked<2>();
   auto scores = py::array_t<float>({T});
   auto scores_data = scores.mutable_data();
-
   auto logProbs_data = logProbs.unchecked<3>();
-  for (auto t = 0; t < T; ++t) {
-      scores_data[t] = logProbs_data(0, t, aligned_paths(0, t));
+
+  {
+    py::gil_scoped_release release;
+
+    forced_align_impl<float, int64_t>(logProbs, targets, blank, paths);
+
+    auto aligned_paths = paths.unchecked<2>();
+    for (auto t = 0; t < T; ++t) {
+        scores_data[t] = logProbs_data(0, t, aligned_paths(0, t));
+    }
   }
 
   return std::make_tuple(paths, scores);
