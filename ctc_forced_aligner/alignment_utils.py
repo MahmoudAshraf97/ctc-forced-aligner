@@ -248,12 +248,11 @@ def get_alignments(
 ):
     assert len(tokens) > 0, "Empty transcript"
 
-    dictionary = tokenizer.get_vocab()
-    if len(dictionary) > tokenizer.vocab_size:
-        raise ValueError(
-            "Tokenizer vocabulary contains more tokens than expected. "
-            "Please open an issue on Github to report this and include the model name."
-        )
+    dictionary = {
+        k: v
+        for k, v in tokenizer.get_vocab().items()
+        if v < tokenizer.vocab_size
+    }
     dictionary = {k.lower(): v for k, v in dictionary.items()}
     dictionary["<star>"] = len(dictionary)
 
