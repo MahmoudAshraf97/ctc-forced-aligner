@@ -111,6 +111,12 @@ void forced_align_impl(
   for (auto t = T - 1; t > -1; t--) {
     auto lbl_idx = ltrIdx % 2 == 0 ? blank : targets_data(batchIndex, ltrIdx / 2);
     paths_data(batchIndex, t) = lbl_idx;
+    // The first frame has no previous frame to trace back to. Looking one up
+    // reads out of bounds when there is one frame, or exactly as many as the
+    // targets need.
+    if (t == 0) {
+      break;
+    }
     // Calculate backPtr value from bits
     auto t_minus_one = t - 1 >= 0 ? t - 1 : 0;
     auto backPtr_idx = backPtr_seek[t_minus_one] +

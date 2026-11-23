@@ -271,7 +271,7 @@ def get_alignments(
         targets,
         blank=blank_id,
     )
-    path = path.squeeze().tolist()
+    path = path[0].tolist()
 
     idx_to_token_map = {v: k for k, v in dictionary.items()}
     segments = merge_repeats(path, idx_to_token_map)
