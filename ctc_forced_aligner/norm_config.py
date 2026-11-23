@@ -270,6 +270,7 @@ norm_config["ara"]["mapping"]["ـ"] = ""
 norm_config["ara"]["mapping"]["ٓ"] = ""
 norm_config["ara"]["mapping"]["ٔ"] = "ء"
 norm_config["ara"]["mapping"]["ٕ"] = "ء"
+norm_config["ara"]["mapping"]["ۡ"] = ""
 norm_config["arb"] = norm_config["ara"].copy()
 
 # =============== Javanese =============== #
