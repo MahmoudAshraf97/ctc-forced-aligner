@@ -244,6 +244,12 @@ Contributions are welcome! Please feel free to open an issue or submit a pull re
 
 This project is licensed under the BSD 2 Clause License, note that the default model has CC-BY-NC 4.0 License, so make sure to use a different model for commercial usage.
 
+One option for commercial usage is [13fragments/xls-r-300m-forced-aligner](https://huggingface.co/13fragments/xls-r-300m-forced-aligner), an Apache 2.0 model with the same vocabulary as the default model. It loads through `--alignment_model` and, like the default model, needs `--romanize`:
+
+```bash
+ctc-forced-aligner --audio_path speech.mp3 --text_path speech.txt --language eng --romanize --alignment_model 13fragments/xls-r-300m-forced-aligner
+```
+
 ### Acknowledgements
 
 This project is based on the work of FAIR MMS team.
